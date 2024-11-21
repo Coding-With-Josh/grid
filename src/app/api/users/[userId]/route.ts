@@ -1,5 +1,5 @@
 import { UserService } from "@/lib/services/user.service";
-import { auth } from "@clerk/nextjs";
+import { getAuth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 
 export async function GET(
@@ -7,7 +7,7 @@ export async function GET(
   { params }: { params: { userId: string } }
 ) {
   try {
-    const { userId } = auth();
+    const { userId } = getAuth(request);
     if (!userId) {
       return new NextResponse("Unauthorized", { status: 401 });
     }
@@ -29,7 +29,7 @@ export async function PATCH(
   { params }: { params: { userId: string } }
 ) {
   try {
-    const { userId } = auth();
+    const { userId } = getAuth(request);
     if (!userId) {
       return new NextResponse("Unauthorized", { status: 401 });
     }

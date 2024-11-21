@@ -1,10 +1,16 @@
-import type { Metadata } from "next";
+import type { Metadata } from 'next';
+import { Nunito } from 'next/font/google';
+import './globals.css';
+import { ThemeProvider } from '@/components/theme-provider';
+import { NavbarWrapper } from '@/components/navbar-wrapper';
 import { Providers } from "@/providers/providers";
-import "./globals.css";
+import { ClerkProvider } from "@clerk/nextjs";
+
+const font = Nunito({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: "Grid - Solana Community Hub",
-  description: "A unified platform for the Solana community to connect, collaborate, and create.",
+  title: 'Grid - Solana Community Platform',
+  description: 'Connect, collaborate, and create with the Solana community.',
 };
 
 export default function RootLayout({
@@ -13,11 +19,21 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="dark">
-      <body className="min-h-screen bg-background antialiased">
-        <Providers>
-          {children}
-        </Providers>
+    <html lang="en" suppressHydrationWarning>
+      <body className={font.className}>
+        <ClerkProvider>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <NavbarWrapper />
+            <Providers>
+              {children}
+            </Providers>
+          </ThemeProvider>
+        </ClerkProvider>
       </body>
     </html>
   );
