@@ -1,5 +1,5 @@
 import { SignIn } from "@clerk/nextjs";
-import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
+import { WalletButton } from "@/components/wallet-button";
 
 export default function Home() {
   return (
@@ -14,7 +14,7 @@ export default function Home() {
           </p>
           
           <div className="flex gap-4">
-            <WalletMultiButton className="px-6 py-3 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors" />
+            <WalletButton />
             <SignIn path="/sign-in" routing="path" signUpUrl="/sign-up" />
           </div>
 

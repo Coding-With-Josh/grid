@@ -10,8 +10,8 @@
   },
   "dependencies": {
     "@clerk/nextjs": "^6.4.0",
+    "@clerk/themes": "^2.1.45",
     "@hookform/resolvers": "^3.9.1",
-    "@prisma/client": "^5.22.0",
     "@radix-ui/react-dialog": "^1.1.2",
     "@radix-ui/react-slot": "^1.1.0",
     "@radix-ui/react-tabs": "^1.1.1",
@@ -26,20 +26,25 @@
     "lucide-react": "^0.460.0",
     "next": "14.2.18",
     "next-auth": "^4.24.10",
+    "next-themes": "^0.4.3",
+    "pino-pretty": "^13.0.0",
     "react": "^18",
     "react-dom": "^18",
     "react-hook-form": "^7.53.2",
+    "svix": "^1.41.0",
     "tailwind-merge": "^2.5.4",
     "tailwindcss-animate": "^1.0.7",
     "zod": "^3.23.8"
   },
   "devDependencies": {
+    "@prisma/client": "^5.22.0",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "eslint": "^8",
     "eslint-config-next": "14.2.18",
     "postcss": "^8",
+    "prisma": "^5.22.0",
     "tailwindcss": "^3.4.1",
     "typescript": "^5"
   }
