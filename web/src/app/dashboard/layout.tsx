@@ -21,6 +21,8 @@ import {
   Share2,
   MessageSquare,
   Shield,
+  NotebookTabs,
+  Bot,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
@@ -47,6 +49,21 @@ const sidebarItems: { section: string; items: SidebarItem[]; roles?: UserRole[] 
     ],
   },
   {
+    section: 'AI Tools',
+    items: [
+      {
+        title: 'Meeting Summarizer',
+        href: '/meeting-summ-ai',
+        icon: <NotebookTabs className="h-5 w-5" />,
+      },
+      {
+        title: 'Copilot',
+        href: '/copilot',
+        icon: <Bot className="h-5 w-5" />,
+      },
+    ],
+  },
+  {
     section: 'Design Tools',
     roles: ['designer', 'admin'],
     items: [
@@ -65,6 +82,11 @@ const sidebarItems: { section: string; items: SidebarItem[]; roles?: UserRole[] 
         title: 'Prototypes',
         href: '/dashboard/design/prototypes',
         icon: <PenTool className="h-5 w-5" />,
+      },
+      {
+        title: 'AI Tools',
+        href: '/dashboard/design/ai-tools',
+        icon: <Bot className="h-5 w-5" />,
       },
     ],
   },
@@ -177,7 +199,7 @@ export default function DashboardLayout({
 
   return (
     <div className="flex min-h-screen bg-background">
-      <aside className="hidden w-64 shrink-0 border-r border-border/40 bg-background/80 backdrop-blur-xl supports-[backdrop-filter]:bg-background/80 lg:block">
+      <aside className="fixed hidden w-64 shrink-0 border-r border-border/40 bg-background/80 backdrop-blur-xl supports-[backdrop-filter]:bg-background/80 lg:block">
         <div className="flex h-full flex-col">
           <div className="px-6 py-4">
             <Link href="/dashboard" className="flex items-center gap-2">
