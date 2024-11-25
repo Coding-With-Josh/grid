@@ -1,0 +1,60 @@
+import { NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '../../auth/[...nextauth]/route';
+import { prisma } from '@/lib/db';
+import { z } from 'zod';
+
+const profileSchema = z.object({
+  fullName: z.string().min(2),
+  birthday: z.string().transform((str) => new Date(str)),
+  location: z.string().min(2),
+  role: z.enum(["DEVELOPER", "DESIGNER", "CREATOR", "WRITER"]),
+  bio: z.string().min(10),
+  skills: z.array(z.string()).min(1),
+  website: z.string().url().optional().or(z.literal("")),
+  github: z.string().optional(),
+  twitter: z.string().optional(),
+  linkedin: z.string().optional(),
+  experience: z.number().min(0).max(50),
+  education: z.string().min(2),
+  languages: z.array(z.string()).min(1),
+  availability: z.enum(["FULL_TIME", "PART_TIME", "CONTRACT", "FREELANCE"]),
+});
+
+export async function POST(request: Request) {
+  try {
+    const session = await getServerSession(authOptions);
+    
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const data = await request.json();
+    const validatedData = profileSchema.parse(data);
+
+    const updatedUser = await prisma.user.update({
+      where: {
+        id: session.user.id,
+      },
+      data: {
+        ...validatedData,
+        hasCompletedOnboarding: true,
+      },
+    });
+
+    return NextResponse.json(updatedUser);
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        { error: 'Invalid data', details: error.errors },
+        { status: 400 }
+      );
+    }
+    
+    console.error('Error completing profile:', error);
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
+  }
+}
