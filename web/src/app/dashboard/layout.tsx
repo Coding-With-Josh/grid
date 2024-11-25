@@ -110,6 +110,11 @@ const sidebarItems: { section: string; items: SidebarItem[]; roles?: UserRole[] 
         href: '/dashboard/dev/repos',
         icon: <GitBranch className="h-5 w-5" />,
       },
+      {
+        title: 'AI Tools',
+        href: '/dashboard/dev/ai-tools',
+        icon: <Bot className="h-5 w-5" />,
+      },
     ],
   },
   {
@@ -136,6 +141,10 @@ const sidebarItems: { section: string; items: SidebarItem[]; roles?: UserRole[] 
         title: 'Audio Editor',
         href: '/dashboard/content/audio',
         icon: <Mic className="h-5 w-5" />,
+      },      {
+        title: 'AI Tools',
+        href: '/dashboard/content/ai-tools',
+        icon: <Bot className="h-5 w-5" />,
       },
     ],
   },
@@ -199,9 +208,9 @@ export default function DashboardLayout({
 
   return (
     <div className="flex min-h-screen bg-background">
-      <aside className="fixed hidden w-64 shrink-0 border-r border-border/40 bg-background/80 backdrop-blur-xl supports-[backdrop-filter]:bg-background/80 lg:block">
+      <aside className="overflow-y-scroll fixed hidden w-64 shrink-0 border-r border-border/40 bg-background/80 backdrop-blur-xl supports-[backdrop-filter]:bg-background/80 lg:block">
         <div className="flex h-full flex-col">
-          <div className="px-6 py-4">
+          <div className="absolute top-3 px-6 py-4">
             <Link href="/dashboard" className="flex items-center gap-2">
               <Image
                 src="/logo.svg"

@@ -5,12 +5,12 @@ import { Button } from "@/components/ui/button";
 import { Github, Twitter } from 'lucide-react';
 import { signIn } from 'next-auth/react';
 import { useSearchParams } from 'next/navigation';
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
 import Image from 'next/image';
 import { ButtonLoader } from "@/components/ui/button-loader";
 import { toast } from "sonner";
 
-export default function SignInPage() {
+function SignInContent() {
   const [isLoading, setIsLoading] = useState<string | null>(null);
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get('callbackUrl') || '/onboarding';
@@ -90,5 +90,17 @@ export default function SignInPage() {
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+export default function SignInPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center">
+        <ButtonLoader text="Loading..." />
+      </div>
+    }>
+      <SignInContent />
+    </Suspense>
   );
 }
