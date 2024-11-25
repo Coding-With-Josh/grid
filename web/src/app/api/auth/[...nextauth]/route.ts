@@ -77,40 +77,24 @@ export const authOptions: NextAuthOptions = {
   ],
   callbacks: {
     async session({ session, token }) {
-      return {
-        ...session,
-        user: {
-          ...session.user,
-          id: token.sub,
-          role: token.role || 'creator',
-          hasCompletedOnboarding: token.hasCompletedOnboarding || false,
-          bio: token.bio || null,
-        },
-        accessToken: token.accessToken,
-      };
+      if (session?.user) {
+        session.user.id = token.sub as string;
+        session.user.role = token.role as UserRole;
+        session.user.hasCompletedOnboarding = token.hasCompletedOnboarding as boolean;
+        session.accessToken = token.accessToken as string;
+      }
+      return session;
     },
     async jwt({ token, user, account }) {
-      if (account?.provider === 'github') {
+      if (user) {
+        token.role = user.role;
+        token.hasCompletedOnboarding = user.hasCompletedOnboarding;
+      }
+      
+      if (account && account.provider === 'github') {
         token.accessToken = account.access_token;
       }
-
-      if (user) {
-        const dbUser = await prisma.user.findUnique({
-          where: { id: user.id },
-          select: {
-            id: true,
-            role: true,
-            hasCompletedOnboarding: true,
-            bio: true,
-          },
-        });
-        
-        if (dbUser) {
-          token.role = dbUser.role;
-          token.hasCompletedOnboarding = dbUser.hasCompletedOnboarding;
-          token.bio = dbUser.bio;
-        }
-      }
+      
       return token;
     }
   },

@@ -1,20 +1,27 @@
+import { UserRole } from "@/app/api/auth/[...nextauth]/route";
 import 'next-auth';
-import { User } from '@prisma/client';
 
 declare module 'next-auth' {
   interface Session {
-    user: User & {
+    user: {
       id: string;
+      name: string;
       email: string;
-      name: string | null;
-      hasCompletedOnboarding: boolean;
+      image?: string;
+      role: UserRole;
+      hasCompletedOnboarding?: boolean;
+      bio?: string;
     };
+    accessToken?: string;
   }
-  
+
   interface User {
     id: string;
+    name: string;
     email: string;
-    name: string | null;
-    hasCompletedOnboarding: boolean;
+    image?: string;
+    role: UserRole;
+    hasCompletedOnboarding?: boolean;
+    bio?: string;
   }
 }
