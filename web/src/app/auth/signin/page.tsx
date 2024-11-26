@@ -13,15 +13,22 @@ import { toast } from "sonner";
 function SignInContent() {
   const [isLoading, setIsLoading] = useState<string | null>(null);
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get('callbackUrl') || '/onboarding';
+  const callbackUrl = searchParams.get('callbackUrl') || '/dashboard';
 
   const handleSignIn = async (provider: string) => {
     try {
       setIsLoading(provider);
-      await signIn(provider, { callbackUrl });
+      const result = await signIn(provider, { 
+        callbackUrl,
+        redirect: true,
+      });
+      if (result?.error) {
+        toast.error(`Failed to sign in with ${provider}. Please try again.`);
+      }
     } catch (error) {
       console.error('Sign in error:', error);
       toast.error(`Failed to sign in with ${provider}. Please try again.`);
+    } finally {
       setIsLoading(null);
     }
   };
