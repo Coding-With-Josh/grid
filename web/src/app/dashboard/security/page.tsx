@@ -86,7 +86,7 @@ export default function SecurityPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <Alert variant="warning">
+            <Alert>
               <AlertTriangle className="h-4 w-4" />
               <AlertTitle>Security Update Available</AlertTitle>
               <AlertDescription>
@@ -103,7 +103,7 @@ export default function SecurityPage() {
                 New firewall rules have been applied successfully.
               </AlertDescription>
             </Alert>
-            <Alert variant="success">
+            <Alert>
               <CheckCircle className="h-4 w-4" />
               <AlertTitle>Security Scan Complete</AlertTitle>
               <AlertDescription>
@@ -128,7 +128,7 @@ export default function SecurityPage() {
                   Last updated 2 hours ago
                 </p>
               </div>
-              <Badge variant="success">Active</Badge>
+              <Badge>Active</Badge>
             </div>
             <div className="flex items-center justify-between">
               <div className="space-y-1">
@@ -137,7 +137,7 @@ export default function SecurityPage() {
                   Monitoring all traffic
                 </p>
               </div>
-              <Badge variant="success">Active</Badge>
+              <Badge>Active</Badge>
             </div>
             <div className="flex items-center justify-between">
               <div className="space-y-1">
@@ -146,7 +146,7 @@ export default function SecurityPage() {
                   Valid for 89 days
                 </p>
               </div>
-              <Badge variant="success">Valid</Badge>
+              <Badge>Valid</Badge>
             </div>
             <div className="flex items-center justify-between">
               <div className="space-y-1">
@@ -155,7 +155,7 @@ export default function SecurityPage() {
                   Last backup 4 hours ago
                 </p>
               </div>
-              <Badge variant="success">Active</Badge>
+              <Badge>Active</Badge>
             </div>
             <Button className="w-full mt-4">
               <RefreshCw className="mr-2 h-4 w-4" />

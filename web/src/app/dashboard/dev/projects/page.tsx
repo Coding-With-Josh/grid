@@ -4,45 +4,64 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Code2, GitBranch, Star, Plus, Users2 } from "lucide-react";
+import Link from "next/link";
+import { CreateProjectDialog } from "@/components/modals/create-project-dialog";
+import CreateProjectModal from "./_create-project-modal";
 
 const projects = [
   {
     id: 1,
     title: "Grid Core",
+    slug: "grid-core",
     description: "Core functionality and utilities",
-    language: "TypeScript",
-    stars: 128,
-    forks: 23,
-    contributors: 5,
-    lastCommit: "2 hours ago",
+    type: "DApp",
+    likes: 128,
+    members: 5,
+    createdAt: "2 days ago",
+    updatedAt: "2 hours ago",
   },
   {
     id: 2,
     title: "Grid UI",
+    slug: "grid-ui",
     description: "Component library and design system",
-    language: "TypeScript",
-    stars: 89,
-    forks: 12,
-    contributors: 3,
-    lastCommit: "1 day ago",
+    type: "DApp",
+    likes: 89,
+    members: 3,
+    createdAt: "2 days ago",
+    updatedAt: "1 day ago",
+
   },
   {
     id: 3,
     title: "Grid CLI",
+    slug: "grid-cli",
     description: "Command line tools and utilities",
-    language: "Rust",
-    stars: 45,
-    forks: 8,
-    contributors: 2,
-    lastCommit: "3 days ago",
+    type: "CLI",
+    likes: 45,
+    members: 2,
+    createdAt: "2 days ago",
+    updatedAt: "3 minutes ago",
+  },
+  {
+    id: 3,
+    title: "Test",
+    slug: "test",
+    likes: 87,
+    description: "Testing the app",
+    type: "Smart Contract",
+    members: 2,
+    createdAt: "2 days ago",
+    updatedAt: "Just now",
   },
 ];
 
-const languageColors = {
-  TypeScript: "bg-blue-500",
-  JavaScript: "bg-yellow-500",
-  Rust: "bg-orange-500",
-  Python: "bg-green-500",
+
+const typeColors = {
+  DApp: "bg-blue-500",
+  "Smart Contract": "bg-yellow-500",
+  web: "bg-orange-500",
+  cli: "bg-green-500",
 };
 
 export default function DevProjectsPage() {
@@ -53,15 +72,12 @@ export default function DevProjectsPage() {
           <h1 className="text-3xl font-bold tracking-tight">Development Projects</h1>
           <p className="text-muted-foreground">Manage your code projects and repositories</p>
         </div>
-        <Button className="bg-[#14F195] hover:bg-[#14F195]/90 text-black">
-          <Plus className="h-4 w-4 mr-2" />
-          New Project
-        </Button>
+        <CreateProjectModal/>
       </div>
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {projects.map((project) => (
-          <Card key={project.id} className="hover:shadow-lg transition-shadow">
+          <Link href={`/dashboard/dev/projects/${project.slug}`}><Card key={project.id} className="cursor-pointer hover:shadow-lg transition-shadow">
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div className="space-y-1">
@@ -78,32 +94,33 @@ export default function DevProjectsPage() {
                 <div className="flex items-center gap-4">
                   <div className="flex items-center">
                     <div
-                      className={`w-3 h-3 rounded-full mr-2 ${
-                        languageColors[project.language]
-                      }`}
+                      className={`w-3 h-3 rounded-full mr-2 ${typeColors[project.type]
+                        }`}
                     />
-                    <span className="text-sm">{project.language}</span>
+                    <span className="text-sm">{project.type}</span>
                   </div>
                   <div className="flex items-center text-sm text-muted-foreground">
                     <Star className="h-4 w-4 mr-1" />
-                    {project.stars}
-                  </div>
-                  <div className="flex items-center text-sm text-muted-foreground">
-                    <GitBranch className="h-4 w-4 mr-1" />
-                    {project.forks}
+                    {project.likes}
                   </div>
                   <div className="flex items-center text-sm text-muted-foreground">
                     <Users2 className="h-4 w-4 mr-1" />
-                    {project.contributors}
+                    {project.members}
                   </div>
                 </div>
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">Last commit</span>
-                  <span>{project.lastCommit}</span>
+                  <span className="text-muted-foreground">Updated last</span>
+                  <span>{project.updatedAt}</span>
+                </div>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">Created at</span>
+                  <span>{project.createdAt}</span>
                 </div>
               </div>
             </CardContent>
           </Card>
+          </Link>
+
         ))}
       </div>
     </div>

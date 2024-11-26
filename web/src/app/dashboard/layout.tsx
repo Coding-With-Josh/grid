@@ -141,7 +141,7 @@ const sidebarItems: { section: string; items: SidebarItem[]; roles?: UserRole[] 
         title: 'Audio Editor',
         href: '/dashboard/content/audio',
         icon: <Mic className="h-5 w-5" />,
-      },      {
+      }, {
         title: 'AI Tools',
         href: '/dashboard/content/ai-tools',
         icon: <Bot className="h-5 w-5" />,
@@ -207,69 +207,83 @@ export default function DashboardLayout({
   };
 
   return (
-    <div className="flex min-h-screen bg-background">
-      <aside className="overflow-y-scroll fixed hidden w-64 shrink-0 border-r border-border/40 bg-background/80 backdrop-blur-xl supports-[backdrop-filter]:bg-background/80 lg:block">
-        <div className="flex h-full flex-col">
-          <div className="absolute top-3 px-6 py-4">
-            <Link href="/dashboard" className="flex items-center gap-2">
-              <Image
-                src="/logo.svg"
-                alt="Grid Logo"
-                width={32}
-                height={32}
-                className="rounded-lg"
-              />
-              <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#14F195] to-[#9945FF] font-bold text-xl">
-                Grid
-              </span>
-            </Link>
+    <>
+      {pathname.startsWith("/dashboard/dev/projects") ? (
+        <>
+          <div className="flex min-h-screen bg-background">
+            <main className="flex-1 overflow-y-auto">
+              <div className="container mx-auto p-6 max-w-7xl">
+                {children}
+              </div>
+            </main>
           </div>
-          <div className="flex-1 space-y-1 overflow-y-auto">
-            {sidebarItems.map((section, index) => {
-              if (!isSectionVisible(section)) return null;
-              const visibleItems = section.items.filter(isItemVisible);
-              if (visibleItems.length === 0) return null;
+        </>
+      ) : (
+        <div className="flex min-h-screen bg-background">
+          <aside className="fixed hidden h-screen w-64 shrink-0 border-r border-border/40 bg-background/80 backdrop-blur-xl supports-[backdrop-filter]:bg-background/80 lg:block">
+            <div className="relative flex h-full flex-col">
+              <div className="absolute top-3 px-6 py-4">
+                <Link href="/dashboard" className="flex items-center gap-2">
+                  <Image
+                    src="/logo.svg"
+                    alt="Grid Logo"
+                    width={32}
+                    height={32}
+                    className="rounded-lg"
+                  />
+                  <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#14F195] to-[#9945FF] font-bold text-xl">
+                    Grid
+                  </span>
+                </Link>
+              </div>
+              <div className="flex-1 space-y-1 overflow-y-auto">
+                {sidebarItems.map((section, index) => {
+                  if (!isSectionVisible(section)) return null;
+                  const visibleItems = section.items.filter(isItemVisible);
+                  if (visibleItems.length === 0) return null;
 
-              return (
-                <div key={section.section} className="px-3 py-2">
-                  <h2 className="mb-2 px-4 text-xs font-semibold tracking-tight text-muted-foreground">
-                    {section.section}
-                  </h2>
-                  <div className="space-y-1">
-                    {visibleItems.map((item) => (
-                      <Link
-                        key={item.title}
-                        href={item.href}
-                        className={cn(
-                          'flex items-center justify-between rounded-lg px-4 py-2 text-sm font-medium hover:bg-[#14F195]/10 hover:text-[#14F195] transition-colors',
-                          pathname === item.href
-                            ? 'bg-[#14F195]/10 text-[#14F195]'
-                            : 'text-muted-foreground'
-                        )}
-                      >
-                        <span className="flex items-center gap-3">
-                          {item.icon}
-                          {item.title}
-                        </span>
-                        {item.badge && (
-                          <Badge variant="outline" className="ml-auto">
-                            {item.badge}
-                          </Badge>
-                        )}
-                      </Link>
-                    ))}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+                  return (
+                    <div key={section.section} className="px-3 py-2">
+                      <h2 className="mb-2 px-4 text-xs font-semibold tracking-tight text-muted-foreground">
+                        {section.section}
+                      </h2>
+                      <div className="space-y-1">
+                        {visibleItems.map((item) => (
+                          <Link
+                            key={item.title}
+                            href={item.href}
+                            className={cn(
+                              'flex items-center justify-between rounded-lg px-4 py-2 text-sm font-medium hover:bg-[#14F195]/10 hover:text-[#14F195] transition-colors',
+                              pathname === item.href
+                                ? 'bg-[#14F195]/10 text-[#14F195]'
+                                : 'text-muted-foreground'
+                            )}
+                          >
+                            <span className="flex items-center gap-3">
+                              {item.icon}
+                              {item.title}
+                            </span>
+                            {item.badge && (
+                              <Badge variant="outline" className="ml-auto">
+                                {item.badge}
+                              </Badge>
+                            )}
+                          </Link>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </aside>
+          <main className="flex-1 overflow-y-auto">
+            <div className="container mx-auto p-6 max-w-7xl">
+              {children}
+            </div>
+          </main>
         </div>
-      </aside>
-      <main className="flex-1 overflow-y-auto">
-        <div className="container mx-auto p-6 max-w-7xl">
-          {children}
-        </div>
-      </main>
-    </div>
+      )}
+    </>
   );
 }
