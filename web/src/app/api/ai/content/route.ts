@@ -1,59 +1,82 @@
 import { NextResponse } from 'next/server';
-import OpenAI from 'openai';
-
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+import { generateWithFallback } from '@/lib/ai-providers';
+import { getServerSession } from "next-auth";
+import { prisma } from "@/lib/db";
 
 export async function POST(req: Request) {
   try {
+    const session = await getServerSession();
+    if (!session?.user?.email) {
+      return NextResponse.json(
+        { error: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { email: session.user.email },
+    });
+
+    if (!user) {
+      return NextResponse.json(
+        { error: "User not found" },
+        { status: 404 }
+      );
+    }
+
     const { contentType, description } = await req.json();
 
-    let prompt = '';
-    let maxTokens = 500;
+    let prompt = "";
+    let maxTokens = 1000;
 
     switch (contentType) {
-      case 'blog':
-        prompt = `Write a blog post about: ${description}\n\nMake it engaging, well-structured, and SEO-friendly.`;
-        maxTokens = 1000;
+      case "blog":
+        prompt = `Write a blog post about: ${description}`;
+        maxTokens = 2000;
         break;
-      case 'x':
-        prompt = `Write a Twitter/X post about: ${description}\n\nMake it engaging and within 280 characters.`;
-        maxTokens = 100;
-        break;
-      case 'instagram':
-        prompt = `Write an Instagram post about: ${description}\n\nInclude relevant hashtags and make it engaging.`;
-        maxTokens = 200;
-        break;
-      case 'email':
-        prompt = `Write a professional email about: ${description}\n\nMake it concise and professional.`;
+      case "social":
+        prompt = `Write social media content about: ${description}`;
         maxTokens = 500;
         break;
-      case 'script':
-        prompt = `Write a video script about: ${description}\n\nInclude clear sections for visuals and audio.`;
+      case "email":
+        prompt = `Write a professional email about: ${description}`;
         maxTokens = 1000;
         break;
       default:
         prompt = `Write content about: ${description}`;
     }
 
-    const completion = await openai.chat.completions.create({
-      messages: [
-        {
-          role: "system",
-          content: "You are a professional content writer skilled in creating various types of content."
-        },
-        {
-          role: "user",
-          content: prompt
-        }
-      ],
-      model: "gpt-3.5-turbo-1106",
-      max_tokens: maxTokens,
+    const { content, provider } = await generateWithFallback({
+      prompt,
+      maxTokens,
+      temperature: 0.7,
+    });
+
+    // Track AI usage
+    await prisma.aIUsage.create({
+      data: {
+        type: "CONTENT_GENERATION",
+        prompt,
+        response: content || "",
+        tokens: Math.ceil((content?.length || 0) / 4), // Rough estimate
+        provider,
+        userId: user.id,
+      },
+    });
+
+    // Create notification
+    await prisma.notification.create({
+      data: {
+        type: "SYSTEM",
+        title: "Content Generated",
+        message: `Generated ${contentType} content about: ${description.substring(0, 50)}...`,
+        userId: user.id,
+      },
     });
 
     return NextResponse.json({
-      content: completion.choices[0].message.content,
+      content,
+      provider,
     });
   } catch (error) {
     console.error('Content generation error:', error);

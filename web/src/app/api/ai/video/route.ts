@@ -1,72 +1,104 @@
 import { NextResponse } from 'next/server';
-import OpenAI from 'openai';
-import Replicate from 'replicate';
-
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
-
-const replicate = new Replicate({
-  auth: process.env.REPLICATE_API_TOKEN,
-});
+import { generateWithFallback } from '@/lib/ai-providers';
+import { getServerSession } from "next-auth";
+import { prisma } from "@/lib/db";
 
 export async function POST(req: Request) {
   try {
-    const { description, addVoiceover } = await req.json();
+    const session = await getServerSession();
+    if (!session?.user?.email) {
+      return NextResponse.json(
+        { error: "Unauthorized" },
+        { status: 401 }
+      );
+    }
 
-    // First, generate a detailed script/description using GPT-4
-    const scriptCompletion = await openai.chat.completions.create({
-      messages: [
-        {
-          role: "system",
-          content: "You are a professional video script writer. Create detailed scene descriptions that can be used for video generation."
-        },
-        {
-          role: "user",
-          content: `Write a detailed scene-by-scene description for a video about: ${description}`
-        }
-      ],
-      model: "gpt-3.5-turbo-1106",
-      max_tokens: 500,
+    const user = await prisma.user.findUnique({
+      where: { email: session.user.email },
     });
 
-    const enhancedDescription = scriptCompletion.choices[0].message.content;
+    if (!user) {
+      return NextResponse.json(
+        { error: "User not found" },
+        { status: 404 }
+      );
+    }
 
-    // Generate video using Replicate's text-to-video model
-    const video = await replicate.run(
-      "anotherjesse/zeroscope-v2-xl:9f747673945c62801b13b84701c783929c0ee784e4748ec062204894dda1a351",
-      {
-        input: {
-          prompt: enhancedDescription,
-          num_frames: 50,
-          fps: 24,
-        }
-      }
-    );
+    const { topic, style, duration, projectId } = await req.json();
 
-    let voiceover = null;
-    if (addVoiceover) {
-      // Generate voiceover using OpenAI's text-to-speech
-      const speech = await openai.audio.speech.create({
-        model: "tts-1",
-        voice: "alloy",
-        input: enhancedDescription || description,
+    const prompt = `Write a ${duration}-minute video script about: ${topic}
+Style: ${style}
+Format the output as follows:
+
+TITLE:
+[Video title]
+
+DESCRIPTION:
+[SEO-optimized video description]
+
+SCRIPT:
+[Timestamp] - [Scene Description] - [Narration/Dialogue]
+`;
+
+    const { content: script, provider } = await generateWithFallback({
+      prompt,
+      maxTokens: 2000,
+      temperature: 0.7,
+    });
+
+    // Track AI usage
+    await prisma.aIUsage.create({
+      data: {
+        type: "VIDEO_SCRIPT",
+        prompt,
+        response: script || "",
+        tokens: Math.ceil((script?.length || 0) / 4), // Rough estimate
+        provider,
+        userId: user.id,
+      },
+    });
+
+    // If projectId is provided, store the generation
+    if (projectId) {
+      await prisma.aIGeneration.create({
+        data: {
+          type: "video",
+          input: `${duration}-minute ${style} video about: ${topic}`,
+          output: script || "",
+          projectId,
+        },
       });
 
-      // Convert the speech response to base64
-      const audioBuffer = Buffer.from(await speech.arrayBuffer());
-      voiceover = audioBuffer.toString('base64');
+      // Create notification
+      await prisma.notification.create({
+        data: {
+          type: "SYSTEM",
+          title: "Video Script Generated",
+          message: `Generated ${duration}-minute ${style} video script: ${topic.substring(0, 50)}...`,
+          userId: user.id,
+          link: `/dashboard/projects/${projectId}`,
+        },
+      });
+    } else {
+      // Create notification without project link
+      await prisma.notification.create({
+        data: {
+          type: "SYSTEM",
+          title: "Video Script Generated",
+          message: `Generated ${duration}-minute ${style} video script: ${topic.substring(0, 50)}...`,
+          userId: user.id,
+        },
+      });
     }
 
     return NextResponse.json({
-      videoUrl: video,
-      voiceover,
-      script: enhancedDescription,
+      script,
+      provider,
     });
   } catch (error) {
-    console.error('Video generation error:', error);
+    console.error('Video script generation error:', error);
     return NextResponse.json(
-      { error: 'Failed to generate video' },
+      { error: 'Failed to generate video script' },
       { status: 500 }
     );
   }

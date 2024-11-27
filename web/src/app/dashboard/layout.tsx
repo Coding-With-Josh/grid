@@ -208,11 +208,11 @@ export default function DashboardLayout({
 
   return (
     <>
-      {pathname.startsWith("/dashboard/dev/projects") ? (
+      {pathname.startsWith("/dashboard/dev/projects/") ? (
         <>
           <div className="flex min-h-screen bg-background">
             <main className="flex-1 overflow-y-auto">
-              <div className="container mx-auto p-6 max-w-7xl">
+              <div className="p-6">
                 {children}
               </div>
             </main>
