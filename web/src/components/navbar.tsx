@@ -28,9 +28,9 @@ export function Navbar() {
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/80 backdrop-blur-xl supports-[backdrop-filter]:bg-background/80">
       <nav className="container flex h-16 items-center px-8">
         <div className="mr-4 flex">
-          <Link 
-            href="/" 
-            className="mr-6 flex items-center gap-2 text-lg font-bold"
+          <Link
+            href="/"
+            className="mr-8 flex items-center gap-2 text-lg font-bold"
           >
             <Image
               src="/logo.svg"
@@ -45,16 +45,15 @@ export function Navbar() {
             </span>
           </Link>
 
-          <div className="hidden md:flex space-x-6">
+          <div className="hidden md:flex h-full items-center justify-center space-x-6">
             {routes.map((route) => (
               <Link
                 key={route.href}
                 href={route.href}
-                className={`text-sm font-medium transition-colors hover:text-[#14F195] ${
-                  pathname === route.href
+                className={`text-sm font-medium transition-colors hover:text-[#14F195] ${pathname === route.href
                     ? 'text-[#14F195]'
                     : 'text-foreground/60'
-                }`}
+                  }`}
               >
                 {route.label}
               </Link>
@@ -75,8 +74,8 @@ export function Navbar() {
                 <Button variant="ghost" asChild className="hover:text-[#14F195] hover:bg-[#14F195]/10">
                   <Link href="/auth/signin">Sign In</Link>
                 </Button>
-                <Button 
-                  asChild 
+                <Button
+                  asChild
                   className="bg-[#14F195] hover:bg-[#14F195]/90 text-black font-medium"
                 >
                   <Link href="/onboarding">Get Started</Link>
@@ -87,9 +86,9 @@ export function Navbar() {
 
           <Sheet>
             <SheetTrigger asChild className="md:hidden">
-              <Button 
-                variant="ghost" 
-                size="icon" 
+              <Button
+                variant="ghost"
+                size="icon"
                 className="md:hidden hover:bg-[#14F195]/10"
               >
                 <Menu className="h-5 w-5" />
@@ -102,11 +101,10 @@ export function Navbar() {
                   <Link
                     key={route.href}
                     href={route.href}
-                    className={`text-sm font-medium transition-colors hover:text-[#14F195] ${
-                      pathname === route.href
+                    className={`text-sm font-medium transition-colors hover:text-[#14F195] ${pathname === route.href
                         ? 'text-[#14F195]'
                         : 'text-foreground/60'
-                    }`}
+                      }`}
                   >
                     {route.label}
                   </Link>
@@ -122,15 +120,15 @@ export function Navbar() {
                     </div>
                   ) : (
                     <>
-                      <Button 
-                        variant="ghost" 
-                        asChild 
+                      <Button
+                        variant="ghost"
+                        asChild
                         className="w-full hover:text-[#14F195] hover:bg-[#14F195]/10"
                       >
                         <Link href="/auth/signin">Sign In</Link>
                       </Button>
-                      <Button 
-                        asChild 
+                      <Button
+                        asChild
                         className="w-full bg-[#14F195] hover:bg-[#14F195]/90 text-black font-medium"
                       >
                         <Link href="/onboarding">Get Started</Link>

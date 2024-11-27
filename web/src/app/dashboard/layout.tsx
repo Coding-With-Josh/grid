@@ -53,12 +53,12 @@ const sidebarItems: { section: string; items: SidebarItem[]; roles?: UserRole[] 
     items: [
       {
         title: 'Meeting Summarizer',
-        href: '/meeting-summ-ai',
+        href: '/dashboard/ai/meeting-summarizer',
         icon: <NotebookTabs className="h-5 w-5" />,
       },
       {
         title: 'Copilot',
-        href: '/copilot',
+        href: '/dashboard/ai/copilot',
         icon: <Bot className="h-5 w-5" />,
       },
     ],
@@ -221,8 +221,8 @@ export default function DashboardLayout({
       ) : (
         <div className="flex min-h-screen bg-background">
           <aside className="fixed hidden h-screen w-64 shrink-0 border-r border-border/40 bg-background/80 backdrop-blur-xl supports-[backdrop-filter]:bg-background/80 lg:block">
-            <div className="relative flex h-full flex-col">
-              <div className="absolute top-3 px-6 py-4">
+            <div className="flex h-full flex-col">
+              {/* <div className="px-6 py-4"> 
                 <Link href="/dashboard" className="flex items-center gap-2">
                   <Image
                     src="/logo.svg"
@@ -235,7 +235,7 @@ export default function DashboardLayout({
                     Grid
                   </span>
                 </Link>
-              </div>
+              </div> */}
               <div className="flex-1 space-y-1 overflow-y-auto">
                 {sidebarItems.map((section, index) => {
                   if (!isSectionVisible(section)) return null;
