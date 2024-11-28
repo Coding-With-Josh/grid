@@ -23,14 +23,19 @@ const profileSchema = z.object({
 
 export async function POST(request: Request) {
   try {
+    console.log("Starting profile completion...");
     const session = await getServerSession(authOptions);
     
     if (!session?.user?.id) {
+      console.log("No session found");
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const data = await request.json();
+    console.log("Received data:", data);
+    
     const validatedData = profileSchema.parse(data);
+    console.log("Validated data:", validatedData);
 
     const updatedUser = await prisma.user.update({
       where: {
@@ -41,19 +46,27 @@ export async function POST(request: Request) {
         hasCompletedOnboarding: true,
       },
     });
+    console.log("User updated:", updatedUser);
 
-    return NextResponse.json(updatedUser);
+    // Ensure the session is updated
+    const response = NextResponse.json({ 
+      success: true,
+      user: updatedUser 
+    });
+
+    return response;
   } catch (error) {
+    console.error('Profile completion error:', error);
+    
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { error: 'Invalid data', details: error.errors },
         { status: 400 }
       );
     }
-    
-    console.error('Error completing profile:', error);
+
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: error instanceof Error ? error.message : 'Failed to complete profile' },
       { status: 500 }
     );
   }

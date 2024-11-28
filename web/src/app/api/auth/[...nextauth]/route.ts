@@ -6,7 +6,7 @@ import GoogleProvider from "next-auth/providers/google";
 import TwitterProvider from "next-auth/providers/twitter";
 import { prisma } from "@/lib/db";
 
-export type UserRole = 'developer' | 'designer' | 'creator' | 'admin';
+export type UserRole = 'DEVELOPER' | 'DESIGNER' | 'CREATOR' | 'WRITER';
 
 export interface User {
   id: string;
@@ -36,7 +36,7 @@ export const authOptions: NextAuthOptions = {
           email: profile.email,
           image: profile.avatar_url,
           bio: profile.bio,
-          role: 'developer',
+          role: 'DEVELOPER',
         }
       },
     }),
@@ -56,7 +56,7 @@ export const authOptions: NextAuthOptions = {
           name: profile.name,
           email: profile.email,
           image: profile.picture,
-          role: 'creator',
+          role: 'CREATOR',
         }
       },
     }),
@@ -70,7 +70,7 @@ export const authOptions: NextAuthOptions = {
           name: profile.data.name,
           email: profile.data.email,
           image: profile.data.profile_image_url,
-          role: 'creator',
+          role: 'CREATOR',
         }
       }
     })
@@ -91,6 +91,17 @@ export const authOptions: NextAuthOptions = {
         token.hasCompletedOnboarding = user.hasCompletedOnboarding;
       }
       
+      // Fetch latest user data from database
+      const dbUser = await prisma.user.findUnique({
+        where: { id: token.sub as string },
+        select: { hasCompletedOnboarding: true, role: true }
+      });
+
+      if (dbUser) {
+        token.hasCompletedOnboarding = dbUser.hasCompletedOnboarding;
+        token.role = dbUser.role;
+      }
+      
       if (account && account.provider === 'github') {
         token.accessToken = account.access_token;
       }
@@ -99,7 +110,7 @@ export const authOptions: NextAuthOptions = {
     }
   },
   pages: {
-    signIn: '/api/auth/signin',
+    signIn: '/auth/signin',
     error: '/auth/error',
   },
   session: {

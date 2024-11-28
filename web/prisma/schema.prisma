@@ -79,6 +79,7 @@ model Project {
   creatorId       String
   collaborators   User[]        @relation("ProjectCollaborators")
   category        Category      @default(OTHER)
+  projectType     ProjectType   @default(OTHER)
   status          Status        @default(OPEN)
   tags            String[]
   tasks           Task[]
@@ -160,10 +161,10 @@ enum UserRole {
 }
 
 enum Category {
-  DEVELOPMENT
-  DESIGN
-  CONTENT
-  MARKETING
+  DEVELOPER
+  DESIGNER
+  CREATOR
+  WRITER
   OTHER
 }
 
@@ -218,4 +219,41 @@ enum Visibility {
   PUBLIC
   PRIVATE
   TEAM
+}
+
+enum ProjectType {
+  // Developer Types
+  WEB
+  DAPP
+  SMART_CONTRACT
+  MOBILE
+  CLI
+  AI
+  API
+  
+  // Designer Types
+  UI_DESIGN
+  UX_DESIGN
+  GRAPHIC_DESIGN
+  BRANDING
+  PROTOTYPE
+  ILLUSTRATION
+  UI_COMPONENTS
+  
+  // Creator Types
+  VIDEO
+  BLOG
+  PODCAST
+  COURSE
+  EBOOK
+  NEWSLETTER
+  
+  // Writer Types
+  TECHNICAL_WRITING
+  CREATIVE_WRITING
+  DOCUMENTATION
+  COPYWRITING
+  
+  // Other
+  OTHER
 }

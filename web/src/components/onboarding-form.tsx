@@ -30,9 +30,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import MultiSelect from "@/components/ui/multi-select";
-import {type Option} from "@/components/ui/multi-select";
+import { type Option } from "@/components/ui/multi-select";
 import { Label } from "recharts";
-
+import { toast } from "@/hooks/use-toast";
 
 const formSchema = z.object({
   fullName: z.string().min(2, "Full name must be at least 2 characters"),
@@ -68,12 +68,12 @@ const skillOptions: Option[] = [
 ];
 
 const languageOptions = [
-  {label: "English", value: "English"},
-  {label: "Spanish", value: "Spanish"},
-  {label: "French", value: "French"},
-  {label: "German", value: "German"},
-  {label: "Chinese", value: "Chinese"},
-  {label: "Japanese", value: "Japanese"},
+  { label: "English", value: "English" },
+  { label: "Spanish", value: "Spanish" },
+  { label: "French", value: "French" },
+  { label: "German", value: "German" },
+  { label: "Chinese", value: "Chinese" },
+  { label: "Japanese", value: "Japanese" },
 
   // Add more languages as needed
 ];
@@ -92,7 +92,10 @@ export function OnboardingForm() {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
+      console.log("Starting form submission...");
       setLoading(true);
+      
+      console.log("Submitting data:", values);
       const response = await fetch("/api/user/complete-profile", {
         method: "POST",
         headers: {
@@ -101,14 +104,28 @@ export function OnboardingForm() {
         body: JSON.stringify(values),
       });
 
+      console.log("Response status:", response.status);
+      const data = await response.json();
+      console.log("Response data:", data);
+
       if (!response.ok) {
-        throw new Error("Failed to complete profile");
+        throw new Error(data.error || "Failed to complete profile");
       }
 
-      router.push("/dashboard");
-      router.refresh();
+      toast({
+        title: "Success",
+        description: "Profile completed successfully!",
+      });
+      
+      console.log("Redirecting to dashboard...");
+      window.location.replace("/dashboard");
     } catch (error) {
-      console.error(error);
+      console.error("Form submission error:", error);
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to complete profile",
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
     }

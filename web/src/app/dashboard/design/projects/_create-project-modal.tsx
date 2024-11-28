@@ -32,24 +32,12 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/hooks/use-toast";
 import { Loader, Plus } from "lucide-react";
-import { useSession } from "next-auth/react";
 
 export const projectSchema = z.object({
   title: z.string().min(1, { message: "Please enter a project title." }),
   description: z.string().min(1, { message: "Please enter a project description." }),
-  projectType: z.enum([
-    // Developer Types
-    "WEB", "DAPP", "SMART_CONTRACT", "MOBILE", "CLI", "AI", "API",
-    // Designer Types
-    "UI_DESIGN", "UX_DESIGN", "GRAPHIC_DESIGN", "BRANDING", "PROTOTYPE", "ILLUSTRATION", "UI_COMPONENTS",
-    // Creator Types
-    "VIDEO", "BLOG", "PODCAST", "COURSE", "EBOOK", "NEWSLETTER",
-    // Writer Types
-    "TECHNICAL_WRITING", "CREATIVE_WRITING", "DOCUMENTATION", "COPYWRITING",
-    // Other
-    "OTHER"
-  ]),
-  visibility: z.enum(["PUBLIC", "PRIVATE", "UNLISTED"]),
+  status: z.enum(["PLANNING", "IN_PROGRESS", "REVIEW", "COMPLETED"]),
+  type: z.enum(["UI", "UX", "BRANDING", "ILLUSTRATION", "MOTION", "OTHER"]),
   tags: z.string().optional(),
 });
 
@@ -59,69 +47,22 @@ interface CreateProjectModalProps {
   onSuccess?: () => void;
 }
 
-const getProjectTypesByRole = (role: string) => {
-  switch (role?.toUpperCase()) {
-    case 'DEVELOPER':
-      return [
-        { value: "WEB", label: "Web Application" },
-        { value: "DAPP", label: "Decentralized App" },
-        { value: "SMART_CONTRACT", label: "Smart Contract" },
-        { value: "MOBILE", label: "Mobile App" },
-        { value: "CLI", label: "Command Line Tool" },
-        { value: "AI", label: "AI/ML Project" },
-        { value: "API", label: "API/Backend" },
-      ];
-    case 'DESIGNER':
-      return [
-        { value: "UI_DESIGN", label: "UI Design" },
-        { value: "UX_DESIGN", label: "UX Design" },
-        { value: "GRAPHIC_DESIGN", label: "Graphic Design" },
-        { value: "BRANDING", label: "Branding" },
-        { value: "PROTOTYPE", label: "Prototype" },
-        { value: "ILLUSTRATION", label: "Illustration" },
-        { value: "UI_COMPONENTS", label: "UI Components" },
-      ];
-    case 'CREATOR':
-      return [
-        { value: "VIDEO", label: "Video" },
-        { value: "BLOG", label: "Blog" },
-        { value: "PODCAST", label: "Podcast" },
-        { value: "COURSE", label: "Course" },
-        { value: "EBOOK", label: "eBook" },
-        { value: "NEWSLETTER", label: "Newsletter" },
-      ];
-    case 'WRITER':
-      return [
-        { value: "TECHNICAL_WRITING", label: "Technical Writing" },
-        { value: "CREATIVE_WRITING", label: "Creative Writing" },
-        { value: "DOCUMENTATION", label: "Documentation" },
-        { value: "COPYWRITING", label: "Copywriting" },
-      ];
-    default:
-      return [{ value: "OTHER", label: "Other" }];
-  }
-};
-
 export default function CreateProjectModal({ onSuccess }: CreateProjectModalProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const { data: session } = useSession();
-  const userRole = session?.user?.role || 'CREATOR';
-  const projectTypes = getProjectTypesByRole(userRole);
-
   const form = useForm<ProjectFormValues>({
     resolver: zodResolver(projectSchema),
     defaultValues: {
       title: "",
       description: "",
-      projectType: projectTypes[0].value,
-      visibility: "PUBLIC",
+      status: "PLANNING",
+      type: "UI",
       tags: "",
     },
   });
 
   async function onSubmit(values: ProjectFormValues) {
     try {
-      const response = await fetch("/api/projects/create", {
+      const response = await fetch("/api/design/projects", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -133,8 +74,7 @@ export default function CreateProjectModal({ onSuccess }: CreateProjectModalProp
       });
 
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || "Failed to create project");
+        throw new Error("Failed to create project");
       }
 
       const data = await response.json();
@@ -144,7 +84,7 @@ export default function CreateProjectModal({ onSuccess }: CreateProjectModalProp
       
       toast({
         title: "Project created successfully",
-        description: "Your new project has been created.",
+        description: "Your new design project has been created.",
       });
 
       onSuccess?.();
@@ -152,7 +92,7 @@ export default function CreateProjectModal({ onSuccess }: CreateProjectModalProp
       console.error("Failed to create project:", error);
       toast({
         title: "Error creating project",
-        description: error instanceof Error ? error.message : "Please try again later.",
+        description: "Please try again later.",
         variant: "destructive",
       });
     }
@@ -161,14 +101,14 @@ export default function CreateProjectModal({ onSuccess }: CreateProjectModalProp
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button className="bg-[#14F195] hover:bg-[#14F195]/90 text-black">
+        <Button size="sm" className="bg-[#14F195] hover:bg-[#14F195]/90 text-black">
           <Plus className="h-4 w-4 mr-2" />
           New Project
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Create Project</DialogTitle>
+          <DialogTitle>Create Design Project</DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -179,7 +119,7 @@ export default function CreateProjectModal({ onSuccess }: CreateProjectModalProp
                 <FormItem>
                   <FormLabel>Title</FormLabel>
                   <FormControl>
-                    <Input placeholder="My Awesome Project" {...field} />
+                    <Input placeholder="My Design Project" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -193,7 +133,7 @@ export default function CreateProjectModal({ onSuccess }: CreateProjectModalProp
                   <FormLabel>Description</FormLabel>
                   <FormControl>
                     <Textarea 
-                      placeholder="Describe your project..."
+                      placeholder="Describe your design project..."
                       className="resize-none"
                       {...field}
                     />
@@ -204,22 +144,23 @@ export default function CreateProjectModal({ onSuccess }: CreateProjectModalProp
             />
             <FormField
               control={form.control}
-              name="projectType"
+              name="type"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Project Type</FormLabel>
+                  <FormLabel>Type</FormLabel>
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Select a project type" />
+                        <SelectValue placeholder="Select a type" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {projectTypes.map((type) => (
-                        <SelectItem key={type.value} value={type.value}>
-                          {type.label}
-                        </SelectItem>
-                      ))}
+                      <SelectItem value="UI">UI Design</SelectItem>
+                      <SelectItem value="UX">UX Design</SelectItem>
+                      <SelectItem value="BRANDING">Branding</SelectItem>
+                      <SelectItem value="ILLUSTRATION">Illustration</SelectItem>
+                      <SelectItem value="MOTION">Motion Design</SelectItem>
+                      <SelectItem value="OTHER">Other</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -228,20 +169,21 @@ export default function CreateProjectModal({ onSuccess }: CreateProjectModalProp
             />
             <FormField
               control={form.control}
-              name="visibility"
+              name="status"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Visibility</FormLabel>
+                  <FormLabel>Status</FormLabel>
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Select visibility" />
+                        <SelectValue placeholder="Select status" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="PUBLIC">Public</SelectItem>
-                      <SelectItem value="PRIVATE">Private</SelectItem>
-                      <SelectItem value="UNLISTED">Unlisted</SelectItem>
+                      <SelectItem value="PLANNING">Planning</SelectItem>
+                      <SelectItem value="IN_PROGRESS">In Progress</SelectItem>
+                      <SelectItem value="REVIEW">Review</SelectItem>
+                      <SelectItem value="COMPLETED">Completed</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -256,7 +198,7 @@ export default function CreateProjectModal({ onSuccess }: CreateProjectModalProp
                   <FormLabel>Tags</FormLabel>
                   <FormControl>
                     <Input 
-                      placeholder="blockchain, defi, web3 (comma separated)"
+                      placeholder="ui, mobile, web (comma separated)"
                       {...field}
                     />
                   </FormControl>

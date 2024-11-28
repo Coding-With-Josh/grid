@@ -1,10 +1,31 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
+import { authOptions } from '../auth/[...nextauth]/route';
 import { prisma } from "@/lib/db";
+import { z } from 'zod';
+
+const projectSchema = z.object({
+  title: z.string().min(1, 'Title is required'),
+  description: z.string().min(1, 'Description is required'),
+  projectType: z.enum([
+    // Developer Types
+    "WEB", "DAPP", "SMART_CONTRACT", "MOBILE", "CLI", "AI", "API",
+    // Designer Types
+    "UI_DESIGN", "UX_DESIGN", "GRAPHIC_DESIGN", "BRANDING", "PROTOTYPE", "ILLUSTRATION", "UI_COMPONENTS",
+    // Creator Types
+    "VIDEO", "BLOG", "PODCAST", "COURSE", "EBOOK", "NEWSLETTER",
+    // Writer Types
+    "TECHNICAL_WRITING", "CREATIVE_WRITING", "DOCUMENTATION", "COPYWRITING",
+    // Other
+    "OTHER"
+  ]),
+  visibility: z.enum(["PUBLIC", "PRIVATE", "TEAM"]),
+  tags: z.array(z.string()).optional().default([]),
+});
 
 export async function GET(req: Request) {
   try {
-    const session = await getServerSession();
+    const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
       return NextResponse.json(
         { error: "Unauthorized" },
@@ -68,7 +89,7 @@ export async function GET(req: Request) {
 
 export async function POST(req: Request) {
   try {
-    const session = await getServerSession();
+    const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
       return NextResponse.json(
         { error: "Unauthorized" },
@@ -87,15 +108,21 @@ export async function POST(req: Request) {
       );
     }
 
-    const { title, description, category, visibility, tags } = await req.json();
+    const body = await req.json();
+    const validatedData = projectSchema.parse(body);
+
+    // Map user role to category
+    const roleToCategory = {
+      'DEVELOPER': 'DEVELOPER',
+      'DESIGNER': 'DESIGNER',
+      'CREATOR': 'CREATOR',
+      'WRITER': 'WRITER',
+    } as const;
 
     const project = await prisma.project.create({
       data: {
-        title,
-        description,
-        category: category || "OTHER",
-        visibility: visibility || "PUBLIC",
-        tags: tags || [],
+        ...validatedData,
+        category: roleToCategory[user.role as keyof typeof roleToCategory] || "OTHER",
         creator: {
           connect: { id: user.id },
         },
@@ -115,7 +142,7 @@ export async function POST(req: Request) {
       data: {
         type: "PROJECT_UPDATE",
         title: "Project Created",
-        message: `You created a new project: ${title}`,
+        message: `You created a new project: ${validatedData.title}`,
         userId: user.id,
         link: `/dashboard/dev/projects/${project.id}`,
       },
@@ -123,9 +150,16 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ project });
   } catch (error) {
-    console.error("Failed to create project:", error);
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        { error: "Validation error", details: error.errors },
+        { status: 400 }
+      );
+    }
+    
+    console.error('Project creation error:', error);
     return NextResponse.json(
-      { error: "Failed to create project" },
+      { error: 'Failed to create project' },
       { status: 500 }
     );
   }
