@@ -35,8 +35,10 @@ export function NotificationsDropdown() {
 
   const fetchNotifications = async () => {
     try {
+      console.log("Fetching notifications...");
       const response = await fetch("/api/notifications");
       const data = await response.json();
+      console.log("Notifications response:", data);
       if (data.notifications) {
         setNotifications(data.notifications);
         setUnreadCount(data.notifications.filter((n: Notification) => !n.read).length);

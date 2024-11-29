@@ -6,9 +6,28 @@ import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 import Link from "next/link";
 import "@/styles/wallet.css";
 import { ProfileDropdown } from "./profile-dropdown";
-import { NotificationsDropdown } from "./notifications-dropdown";
+import { NotificationsDropdown } from "@/components/notifications/notifications-dropdown";
 import Image from "next/image";
 
+  /**
+   * Renders the navbar for the dashboard.
+   *
+   * This component is special because it uses the `use client` directive, which
+   * allows it to be server-side rendered. This is necessary because the navbar
+   * needs to be rendered on the server in order for the wallet adapter to work
+   * properly.
+   *
+   * The navbar is fixed to the top of the page and has a width of `calc(100% -
+   * 256px)`, which is the width of the sidebar. It also has a border at the
+   * bottom.
+   *
+   * The navbar contains a logo, a mode toggle, a wallet multi button, and a
+   * profile dropdown. The logo is a link to the dashboard, and the other
+   * components are rendered in the order they are listed.
+   *
+   * The navbar also renders a spacer element with a height of 20px, which is
+   * necessary to account for the height of the navbar.
+   */
 export function DashboardNavbar() {
   return (
     <>
