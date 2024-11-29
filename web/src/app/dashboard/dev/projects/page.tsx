@@ -106,7 +106,7 @@ export default function DevProjectsPage() {
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {projects.map((project) => (
-          <Link href={`/dashboard/dev/projects/${project.id}`} key={project.id}>
+          <Link href={`/dashboard/dev/projects/${project.slug}`} key={project.id}>
             <Card className="cursor-pointer hover:shadow-lg transition-shadow">
               <CardHeader>
                 <div className="flex items-center justify-between">
@@ -128,7 +128,7 @@ export default function DevProjectsPage() {
                           typeColors[project.category]
                         }`}
                       />
-                      <span className="text-sm">{project.category.replace('_', ' ')}</span>
+                      <span className="text-sm">{project.projectType.replace('_', ' ')}</span>
                     </div>
                     <div className="flex items-center text-sm text-muted-foreground">
                       <GitBranch className="h-4 w-4 mr-1" />

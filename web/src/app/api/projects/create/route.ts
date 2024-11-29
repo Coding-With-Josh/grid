@@ -50,6 +50,14 @@ export async function POST(req: Request) {
       'WRITER': 'WRITER',
     } as const;
 
+    // Name to slug
+    const slug = validatedData.title
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+
+
+    // Create project
     const project = await prisma.project.create({
       data: {
         ...validatedData,
@@ -57,6 +65,7 @@ export async function POST(req: Request) {
         creator: {
           connect: { id: user.id },
         },
+        slug: slug,
       },
       include: {
         creator: {

@@ -6,8 +6,13 @@ import { DashboardNavbar } from './dashboard-navbar';
 
 export function NavbarWrapper({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const dashpo = pathname.startsWith("/dashboard/dev/projects")
+  const isEditorPage = pathname.endsWith('/editor');
   const hideNavbarPaths = ['/onboarding'];
+
+  // Don't show any navigation for editor pages
+  if (isEditorPage) {
+    return <>{children}</>;
+  }
 
   if (hideNavbarPaths.includes(pathname)) {
     return <>{children}</>;
@@ -24,17 +29,8 @@ export function NavbarWrapper({ children }: { children: React.ReactNode }) {
 
   return (
     <>
-      {pathname.includes("/dashboard/dev/projects") ? (
-        <>
-          {children}
-        </>
-      ) : (
-        <>
-          <Navbar />
-          {children}
-        </>
-      )}
-
+      <Navbar />
+      {children}
     </>
   );
 }

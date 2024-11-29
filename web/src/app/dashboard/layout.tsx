@@ -208,7 +208,7 @@ export default function DashboardLayout({
 
   return (
     <>
-      {pathname.startsWith("/dashboard/dev/projects/") ? (
+      {pathname.endsWith("/editor") ? (
         <>
           <div className="flex min-h-screen bg-background">
             <main className="flex-1 overflow-y-auto">

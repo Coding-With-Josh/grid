@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from '../auth/[...nextauth]/route';
 import { prisma } from "@/lib/db";
 import { z } from 'zod';
+import { slugify } from "@/lib/utils";
 
 const projectSchema = z.object({
   title: z.string().min(1, 'Title is required'),
@@ -47,9 +48,9 @@ export async function GET(req: Request) {
     const projects = await prisma.project.findMany({
       where: {
         OR: [
-          { creatorId: user.id },
-          { collaborators: { some: { id: user.id } } },
-        ],
+          { creator: { id: user.id } },
+          { collaborators: { some: { id: user.id } } }
+        ]
       },
       include: {
         creator: {
@@ -60,7 +61,6 @@ export async function GET(req: Request) {
         },
         collaborators: {
           select: {
-            id: true,
             name: true,
             image: true,
           },
@@ -69,19 +69,20 @@ export async function GET(req: Request) {
           select: {
             tasks: true,
             files: true,
+            collaborators: true,
           },
         },
       },
       orderBy: {
-        updatedAt: 'desc',
+        createdAt: 'desc',
       },
     });
 
     return NextResponse.json({ projects });
   } catch (error) {
-    console.error("Failed to fetch projects:", error);
+    console.error('Failed to fetch projects:', error);
     return NextResponse.json(
-      { error: "Failed to fetch projects" },
+      { error: 'Failed to fetch projects' },
       { status: 500 }
     );
   }
@@ -111,6 +112,21 @@ export async function POST(req: Request) {
     const body = await req.json();
     const validatedData = projectSchema.parse(body);
 
+    // Generate a base slug from the title
+    let baseSlug = slugify(validatedData.title);
+    let slug = baseSlug;
+    let counter = 1;
+
+    // Keep checking until we find a unique slug
+    while (true) {
+      const existing = await prisma.project.findUnique({
+        where: { slug },
+      });
+      if (!existing) break;
+      slug = `${baseSlug}-${counter}`;
+      counter++;
+    }
+
     // Map user role to category
     const roleToCategory = {
       'DEVELOPER': 'DEVELOPER',
@@ -122,6 +138,7 @@ export async function POST(req: Request) {
     const project = await prisma.project.create({
       data: {
         ...validatedData,
+        slug,  // Explicitly add the generated slug
         category: roleToCategory[user.role as keyof typeof roleToCategory] || "OTHER",
         creator: {
           connect: { id: user.id },
@@ -144,7 +161,7 @@ export async function POST(req: Request) {
         title: "Project Created",
         message: `You created a new project: ${validatedData.title}`,
         userId: user.id,
-        link: `/dashboard/dev/projects/${project.id}`,
+        link: `/dashboard/dev/projects/${project.slug}`,
       },
     });
 
