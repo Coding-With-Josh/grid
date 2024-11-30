@@ -9,7 +9,10 @@ import {
   Upload,
   ArrowLeft,
   Undo,
-  Redo
+  Redo,
+  Undo2,
+  Redo2,
+  Send
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
@@ -28,99 +31,80 @@ interface EditorNavbarProps {
 }
 
 export function EditorNavbar({
-  projectId,
-  isPreviewMode,
   onPreviewToggle,
-  onPublish,
-  onSave,
+  isPreviewMode,
+  onUndo,
+  onRedo,
   canUndo,
   canRedo,
-  onUndo,
-  onRedo
+  onSave,
+  onPublish,
 }: EditorNavbarProps) {
   const router = useRouter();
 
   return (
-    <>
-      <nav className="fixed top-0 right-0 w-full border-b border-border/40 bg-background/45 backdrop-blur supports-[backdrop-filter]:bg-background/35 z-50">
-        <div className="container flex h-16 items-center justify-between px-6">
-          <div className="flex items-center gap-4">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => router.push('/dashboard')}
-            >
-              <ArrowLeft className="h-5 w-5" />
-            </Button>
-            <Link href="/dashboard" className="flex items-center gap-2">
-              <Image
-                src="/logo.svg"
-                alt="Grid Logo"
-                width={24}
-                height={24}
-                className="rounded-lg"
-              />
-              <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#14F195] to-[#9945FF] font-bold text-lg">
-                Grid
-              </span>
-            </Link>
-            <Separator orientation="vertical" className="h-6" />
-            <div className="flex items-center gap-2">
-              <Button
-                variant="ghost"
-                size="icon"
-                disabled={!canUndo}
-                onClick={onUndo}
-                title="Undo"
-              >
-                <Undo className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                disabled={!canRedo}
-                onClick={onRedo}
-                title="Redo"
-              >
-                <Redo className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-4">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={onPreviewToggle}
-              title={isPreviewMode ? "Exit Preview" : "Preview"}
-            >
-              {isPreviewMode ? (
-                <EyeOff className="h-5 w-5" />
-              ) : (
-                <Eye className="h-5 w-5" />
-              )}
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={onSave}
-              title="Save"
-            >
-              <Save className="h-5 w-5" />
-            </Button>
-            <Button
-              variant="default"
-              onClick={onPublish}
-              className="gap-2"
-            >
-              <Upload className="h-4 w-4" />
-              Publish
-            </Button>
-            <ModeToggle />
+    <nav className="fixed top-0 left-0 right-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="flex h-14 items-center justify-between px-4">
+        {/* Left section */}
+        <div className="flex items-center gap-4">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => router.back()}
+            className="hover:bg-accent"
+          >
+            <ArrowLeft className="h-5 w-5" />
+          </Button>
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-medium">Editor</span>
           </div>
         </div>
-      </nav>
-      <div className="h-16" />
-    </>
+
+        {/* Center section */}
+        <div className="flex items-center gap-2">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onUndo}
+            disabled={!canUndo}
+            className="hover:bg-accent"
+          >
+            <Undo2 className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onRedo}
+            disabled={!canRedo}
+            className="hover:bg-accent"
+          >
+            <Redo2 className="h-4 w-4" />
+          </Button>
+          <Separator orientation="vertical" className="mx-2 h-6" />
+          <Button
+            variant={isPreviewMode ? "secondary" : "ghost"}
+            size="sm"
+            onClick={onPreviewToggle}
+            className="gap-2"
+          >
+            <Eye className="h-4 w-4" />
+            Preview
+          </Button>
+        </div>
+
+        {/* Right section */}
+        <div className="flex items-center gap-2">
+          <Button variant="ghost" size="sm" onClick={onSave} className="gap-2">
+            <Save className="h-4 w-4" />
+            Save
+          </Button>
+          <Button variant="default" size="sm" onClick={onPublish} className="gap-2">
+            <Send className="h-4 w-4" />
+            Publish
+          </Button>
+          <ModeToggle />
+        </div>
+      </div>
+    </nav>
   );
 }
