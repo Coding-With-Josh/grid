@@ -86,6 +86,7 @@ model Project {
   tasks           Task[]
   files           ProjectFile[]
   aiGenerations   AIGeneration[]
+  editorState     EditorState?
   visibility      Visibility    @default(PUBLIC)
   deadline        DateTime?
   budget          Float?
@@ -151,6 +152,16 @@ model AIGeneration {
   project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
   projectId String
   createdAt DateTime @default(now())
+}
+
+model EditorState {
+  id          String   @id @default(cuid())
+  elements    Json     // Stores the editor elements array
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  projectId   String   @unique
+  version     Int      @default(1)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 enum UserRole {

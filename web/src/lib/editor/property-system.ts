@@ -1,7 +1,8 @@
 import { nanoid } from 'nanoid';
+import { PropertyValidator, ValidationError, createValidator } from './property-validators';
 
-// Property Types
-export type PropertyValue = string | number | boolean | object;
+// Property value types
+export type PropertyValue = string | number | boolean | object | null;
 
 export interface PropertyChange {
   id: string;
@@ -22,8 +23,9 @@ export interface PropertyPreset {
 export interface CustomPropertyType {
   name: string;
   type: 'string' | 'number' | 'boolean' | 'object' | 'color' | 'dimension' | 'expression';
-  validator?: (value: PropertyValue) => boolean;
+  validator?: PropertyValidator;
   transformer?: (value: PropertyValue) => PropertyValue;
+  constraints?: any;
 }
 
 // Property History Manager
@@ -100,27 +102,19 @@ export class PropertyManager {
     this.registerCustomType({
       name: 'color',
       type: 'string',
-      validator: (value) => /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/.test(value as string),
+      validator: createValidator('color'),
     });
 
     this.registerCustomType({
       name: 'dimension',
       type: 'string',
-      validator: (value) => /^[0-9]+(%|px|em|rem|vh|vw)$/.test(value as string),
+      validator: createValidator('dimension'),
     });
 
     this.registerCustomType({
       name: 'expression',
       type: 'string',
-      validator: (value) => {
-        try {
-          // Basic expression validation
-          new Function(`return ${value}`);
-          return true;
-        } catch {
-          return false;
-        }
-      },
+      validator: createValidator('expression'),
     });
   }
 
@@ -151,8 +145,11 @@ export class PropertyManager {
 
     // Validate value if custom type exists
     const customType = this.customTypes.get(propertyName);
-    if (customType?.validator && !customType.validator(value)) {
-      throw new Error(`Invalid value for property ${propertyName}`);
+    if (customType?.validator) {
+      const error = customType.validator.validate(value);
+      if (error) {
+        throw new Error(`Invalid value for property ${propertyName}: ${error.message}`);
+      }
     }
 
     // Transform value if transformer exists
@@ -194,6 +191,8 @@ export class PropertyManager {
           return value ? `${key}: true;` : '';
         } else if (typeof value === 'object') {
           return `${key}: ${JSON.stringify(value)};`;
+        } else if (value === null) {
+          return `${key}: null;`;
         }
         return '';
       })

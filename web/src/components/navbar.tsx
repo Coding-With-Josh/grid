@@ -11,6 +11,7 @@ import { useSession } from 'next-auth/react';
 import { ProfileDropdown } from './profile-dropdown';
 import { NotificationsDropdown } from './notifications-dropdown';
 import Image from 'next/image';
+import { WalletButton } from "./solana/wallet-button";
 
 const routes = [
   { href: '/', label: 'Home' },
@@ -63,6 +64,7 @@ export function Navbar() {
 
         <div className="flex flex-1 items-center justify-end space-x-4">
           <div className="hidden md:flex items-center space-x-4">
+            <WalletButton />
             <ThemeToggle />
             {status === 'authenticated' ? (
               <>

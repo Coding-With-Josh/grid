@@ -27,16 +27,21 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { Slider } from "@/components/ui/slider"
 import { ModeToggle } from "@/components/mode-toggle"
 
-
-import { ButtonIcon, InputIcon, TextareaIcon, CheckboxIcon, SwitchIcon, CardIcon, DividerIcon, SpacerIcon, ProgressIcon } from "@/components/icons/custom-icons";
-import { SelectIcon } from "@radix-ui/react-select";
-import { Wallet, Coins, Grid, ArrowRightLeft, RefreshCw, TextIcon, Type, LinkIcon, RadioIcon, ContainerIcon, ImageIcon, FileText, Star, User, Table2, List, BadgeIcon, TagIcon, AlertCircle, Heart, Share2, MessageCircle, ChevronLeft, Code, Grid3X3, Keyboard, Layout, LayoutGrid, Monitor, Moon, Play, Search, Smartphone, Square, Tablet } from "lucide-react";
+// Solana Widgets
+import {
+  TokenBalance,
+  NFTGallery,
+  SolanaTransfer,
+  TokenSwap,
+  TokenMint,
+  ProgramInteraction
+} from "@/components/solana/widgets"
 
 // Widget Categories
 const widgetCategories = {
   solana: {
     label: "Solana",
-    widgets: ["walletConnect", "tokenBalance", "nftGallery", "solanaTransfer", "tokenSwap"]
+    widgets: ["walletConnect", "tokenBalance", "nftGallery", "solanaTransfer", "tokenSwap", "tokenMint", "programInteraction"]
   },
   text: {
     label: "Text",
@@ -79,7 +84,11 @@ const widgetDefinitions = {
       text: "Connect Wallet",
       variant: "default",
       size: "default",
-      width: "default"
+      width: "auto",
+      showBalance: true,
+      showAddress: true,
+      addressFormat: "short",
+      className: ""
     }
   },
   tokenBalance: {
@@ -87,10 +96,10 @@ const widgetDefinitions = {
     label: "Token Balance",
     icon: Coins,
     defaultProps: {
-      token: "SOL",
+      mint: "",
       showSymbol: true,
       showIcon: true,
-      size: "default"
+      className: ""
     }
   },
   nftGallery: {
@@ -98,20 +107,21 @@ const widgetDefinitions = {
     label: "NFT Gallery",
     icon: Grid,
     defaultProps: {
-      columns: 3,
-      gap: 16,
+      walletAddress: "",
+      gridColumns: 3,
       showName: true,
-      showCollection: true
+      className: ""
     }
   },
   solanaTransfer: {
     type: "solanaTransfer",
-    label: "Transfer",
+    label: "Transfer SOL/SPL",
     icon: ArrowRightLeft,
     defaultProps: {
-      buttonText: "Transfer",
-      showAmount: true,
-      showRecipient: true
+      recipient: "",
+      amount: "0",
+      mint: "",
+      className: ""
     }
   },
   tokenSwap: {
@@ -119,10 +129,30 @@ const widgetDefinitions = {
     label: "Token Swap",
     icon: RefreshCw,
     defaultProps: {
-      fromToken: "SOL",
-      toToken: "USDC",
-      showRates: true,
-      showSlippage: true
+      fromMint: "",
+      toMint: "",
+      slippage: "1",
+      className: ""
+    }
+  },
+  tokenMint: {
+    type: "tokenMint",
+    label: "Token Mint",
+    icon: Coins,
+    defaultProps: {
+      mintAuthority: "",
+      decimals: "9",
+      className: ""
+    }
+  },
+  programInteraction: {
+    type: "programInteraction",
+    label: "Program Interaction",
+    icon: Code,
+    defaultProps: {
+      programId: "",
+      instruction: "",
+      className: ""
     }
   },
   // Text Elements
@@ -347,64 +377,41 @@ const widgetProperties = {
       options: ["full", "short", "hidden"],
       default: "short"
     },
-    customClass: { type: "string", default: "" }
+    className: { type: "string", default: "" }
   },
   tokenBalance: {
-    token: {
-      type: "select",
-      options: ["SOL", "USDC", "RAY", "SRM"],
-      default: "SOL"
-    },
-    showIcon: { type: "boolean", default: true },
+    mint: { type: "string", default: "" },
     showSymbol: { type: "boolean", default: true },
-    showUsdValue: { type: "boolean", default: true },
-    size: {
-      type: "select",
-      options: ["sm", "default", "lg"],
-      default: "default"
-    },
-    refreshInterval: { type: "number", default: 10, min: 5, max: 60 }
+    showIcon: { type: "boolean", default: true },
+    className: { type: "string", default: "" }
   },
   nftGallery: {
-    columns: { type: "number", default: 3, min: 1, max: 6 },
+    walletAddress: { type: "string", default: "" },
+    gridColumns: { type: "number", default: 3, min: 1, max: 6 },
     showName: { type: "boolean", default: true },
-    showCollection: { type: "boolean", default: true },
-    showAttributes: { type: "boolean", default: false },
-    showPrice: { type: "boolean", default: true },
-    itemsPerPage: { type: "number", default: 9, min: 3, max: 24 },
-    layout: {
-      type: "select",
-      options: ["grid", "list", "carousel"],
-      default: "grid"
-    }
+    className: { type: "string", default: "" }
   },
   solanaTransfer: {
-    showAmount: { type: "boolean", default: true },
-    showRecipient: { type: "boolean", default: true },
-    showMemo: { type: "boolean", default: false },
-    allowCustomToken: { type: "boolean", default: false },
-    showRecentTx: { type: "boolean", default: true },
-    confirmations: { type: "number", default: 1, min: 1, max: 32 }
+    recipient: { type: "string", default: "" },
+    amount: { type: "string", default: "0" },
+    mint: { type: "string", default: "" },
+    className: { type: "string", default: "" }
   },
   tokenSwap: {
-    fromToken: {
-      type: "select",
-      options: ["SOL", "USDC", "RAY", "SRM"],
-      default: "SOL"
-    },
-    toToken: {
-      type: "select",
-      options: ["SOL", "USDC", "RAY", "SRM"],
-      default: "USDC"
-    },
-    showRates: { type: "boolean", default: true },
-    showChart: { type: "boolean", default: false },
-    slippageTolerance: { type: "number", default: 0.5, min: 0.1, max: 5, step: 0.1 },
-    routeSelection: {
-      type: "select",
-      options: ["auto", "manual"],
-      default: "auto"
-    }
+    fromMint: { type: "string", default: "" },
+    toMint: { type: "string", default: "" },
+    slippage: { type: "string", default: "1" },
+    className: { type: "string", default: "" }
+  },
+  tokenMint: {
+    mintAuthority: { type: "string", default: "" },
+    decimals: { type: "string", default: "9" },
+    className: { type: "string", default: "" }
+  },
+  programInteraction: {
+    programId: { type: "string", default: "" },
+    instruction: { type: "string", default: "" },
+    className: { type: "string", default: "" }
   },
   // Text Elements
   text: {
@@ -897,15 +904,150 @@ function DroppableCanvas({ children }: { children: React.ReactNode }) {
   );
 }
 
-// Properties Panel Component
+import { usePropertyValidation } from "@/hooks/use-property-validation";
+import { toast } from "@/hooks/use-toast";
+import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
+import { ButtonIcon, InputIcon, TextareaIcon, CheckboxIcon, SwitchIcon, CardIcon, DividerIcon, SpacerIcon, ProgressIcon } from "@/components/icons/custom-icons";
+import { SelectIcon } from "@radix-ui/react-select";
+import { Wallet, Coins, Grid, ArrowRightLeft, RefreshCw, Code, TextIcon, Type, LinkIcon, RadioIcon, ContainerIcon, ImageIcon, FileText, Star, User, Table2, List, BadgeIcon, TagIcon, AlertCircle, Heart, Share2, MessageCircle, Smartphone, Tablet, Monitor, Layout, Moon, ChevronLeft, Grid3X3, Square, Play, Keyboard, Search, LayoutGrid, Redo2, Save, Undo2 } from "lucide-react";
+
+function PropertyField({ 
+  elementId,
+  propertyName,
+  propertyConfig,
+  currentValue,
+  onUpdate
+}: { 
+  elementId: string;
+  propertyName: string;
+  propertyConfig: any;
+  currentValue: any;
+  onUpdate: (value: any) => void;
+}) {
+  const {
+    isValid,
+    error,
+    value,
+    validate
+  } = usePropertyValidation({
+    type: propertyConfig.type,
+    initialValue: currentValue ?? propertyConfig.default,
+    constraints: {
+      min: propertyConfig.min,
+      max: propertyConfig.max,
+      step: propertyConfig.step,
+      pattern: propertyConfig.pattern,
+      options: propertyConfig.options,
+    },
+    onChange: onUpdate
+  });
+
+  const handleChange = (newValue: any) => {
+    if (validate(newValue)) {
+      onUpdate(newValue);
+    } else if (error) {
+      toast({
+        title: "Invalid Value",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
+  return (
+    <div className="space-y-2">
+      <label className="text-sm font-medium flex items-center justify-between">
+        {propertyName.charAt(0).toUpperCase() + propertyName.slice(1)}
+        {propertyConfig.unit && (
+          <span className="text-xs text-muted-foreground">{propertyConfig.unit}</span>
+        )}
+      </label>
+      
+      {propertyConfig.type === "string" && (
+        <Input
+          value={value as string}
+          onChange={e => handleChange(e.target.value)}
+          className={cn("h-8", !isValid && "border-destructive")}
+        />
+      )}
+      
+      {propertyConfig.type === "number" && (
+        <div className="flex gap-2">
+          <Input
+            type="number"
+            value={value as number}
+            onChange={e => handleChange(Number(e.target.value))}
+            min={propertyConfig.min}
+            max={propertyConfig.max}
+            className={cn("h-8", !isValid && "border-destructive")}
+          />
+          <Slider
+            value={[value as number]}
+            onValueChange={([newValue]) => handleChange(newValue)}
+            min={propertyConfig.min}
+            max={propertyConfig.max}
+            step={propertyConfig.step ?? 1}
+            className="flex-1"
+          />
+        </div>
+      )}
+      
+      {propertyConfig.type === "select" && (
+        <Select
+          value={value as string}
+          onValueChange={handleChange}
+        >
+          <SelectTrigger className={cn("h-8", !isValid && "border-destructive")}>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {propertyConfig.options.map((option: string) => (
+              <SelectItem key={option} value={option}>
+                {option}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      )}
+      
+      {propertyConfig.type === "boolean" && (
+        <Switch
+          checked={value as boolean}
+          onCheckedChange={handleChange}
+        />
+      )}
+      
+      {propertyConfig.type === "color" && (
+        <div className="flex gap-2">
+          <div 
+            className="w-8 h-8 rounded border"
+            style={{ backgroundColor: value as string }}
+          />
+          <Input
+            value={value as string}
+            onChange={e => handleChange(e.target.value)}
+            className={cn("h-8 flex-1", !isValid && "border-destructive")}
+          />
+        </div>
+      )}
+
+      {error && (
+        <p className="text-xs text-destructive mt-1">{error.message}</p>
+      )}
+    </div>
+  );
+}
+
 function PropertiesPanel({ 
   selectedElement, 
   elements, 
-  onChange 
+  onChange, 
+  onDelete 
 }: { 
   selectedElement: string | null;
   elements: Array<any>;
   onChange: (elements: Array<any>) => void;
+  onDelete: (id: string) => void;
 }) {
   const element = elements.find(el => el.id === selectedElement);
   if (!element) return null;
@@ -940,90 +1082,373 @@ function PropertiesPanel({
       
       <div className="p-4 space-y-4">
         {Object.entries(properties).map(([key, config]: [string, any]) => (
-          <div key={key} className="space-y-2">
-            <label className="text-sm font-medium flex items-center justify-between">
-              {key.charAt(0).toUpperCase() + key.slice(1)}
-              {config.unit && (
-                <span className="text-xs text-muted-foreground">{config.unit}</span>
-              )}
-            </label>
-            
-            {config.type === "string" && (
-              <Input
-                value={element.props[key] ?? config.default}
-                onChange={e => updateProperty(key, e.target.value)}
-                className="h-8"
-              />
-            )}
-            
-            {config.type === "number" && (
-              <div className="flex gap-2">
-                <Input
-                  type="number"
-                  value={element.props[key] ?? config.default}
-                  onChange={e => updateProperty(key, Number(e.target.value))}
-                  min={config.min}
-                  max={config.max}
-                  className="h-8"
-                />
-                <Slider
-                  value={[element.props[key] ?? config.default]}
-                  onValueChange={([value]) => updateProperty(key, value)}
-                  min={config.min}
-                  max={config.max}
-                  step={1}
-                  className="flex-1"
-                />
-              </div>
-            )}
-            
-            {config.type === "select" && (
-              <Select
-                value={element.props[key] ?? config.default}
-                onValueChange={value => updateProperty(key, value)}
-              >
-                <SelectTrigger className="h-8">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {config.options.map((option: string) => (
-                    <SelectItem key={option} value={option}>
-                      {option}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            )}
-            
-            {config.type === "boolean" && (
-              <Switch
-                checked={element.props[key] ?? config.default}
-                onCheckedChange={value => updateProperty(key, value)}
-              />
-            )}
-            
-            {config.type === "color" && (
-              <div className="flex gap-2">
-                <div 
-                  className="w-8 h-8 rounded border"
-                  style={{ backgroundColor: element.props[key] ?? config.default }}
-                />
-                <Input
-                  value={element.props[key] ?? config.default}
-                  onChange={e => updateProperty(key, e.target.value)}
-                  className="h-8 flex-1"
-                />
-              </div>
-            )}
-          </div>
+          <PropertyField
+            key={key}
+            elementId={element.id}
+            propertyName={key}
+            propertyConfig={config}
+            currentValue={element.props[key]}
+            onUpdate={(value) => updateProperty(key, value)}
+          />
         ))}
       </div>
+      <Button variant="destructive" onClick={() => onDelete(element.id)}>Delete</Button>
     </div>
   );
 }
 
+interface HistoryState {
+  past: any[][];
+  present: any[];
+  future: any[][];
+}
+
+function renderElement(element: any) {
+  switch (element.type) {
+    case "walletConnect":
+      return (
+        <WalletMultiButton
+          className={cn(
+            element.props.width === "full" && "w-full",
+            "flex items-center gap-2",
+            element.props.className
+          )}
+        />
+      );
+    case "tokenBalance":
+      return (
+        <TokenBalance
+          mint={element.props.mint}
+          showSymbol={element.props.showSymbol}
+          showIcon={element.props.showIcon}
+          className={element.props.className}
+        />
+      );
+    case "nftGallery":
+      return (
+        <NFTGallery
+          walletAddress={element.props.walletAddress}
+          gridColumns={element.props.gridColumns}
+          showName={element.props.showName}
+          className={element.props.className}
+        />
+      );
+    case "solanaTransfer":
+      return (
+        <SolanaTransfer
+          recipient={element.props.recipient}
+          amount={element.props.amount}
+          mint={element.props.mint}
+          className={element.props.className}
+        />
+      );
+    case "tokenSwap":
+      return (
+        <TokenSwap
+          fromMint={element.props.fromMint}
+          toMint={element.props.toMint}
+          slippage={element.props.slippage}
+          className={element.props.className}
+        />
+      );
+    case "tokenMint":
+      return (
+        <TokenMint
+          mintAuthority={element.props.mintAuthority}
+          decimals={element.props.decimals}
+          className={element.props.className}
+        />
+      );
+    case "programInteraction":
+      return (
+        <ProgramInteraction
+          programId={element.props.programId}
+          instruction={element.props.instruction}
+          className={element.props.className}
+        />
+      );
+    case "text":
+      return (
+        <p 
+          className="p-2"
+          style={{
+            fontSize: `${element.props.fontSize ?? 16}px`,
+            fontWeight: element.props.fontWeight ?? "normal",
+            color: element.props.color ?? "#000000",
+            textAlign: element.props.alignment ?? "left"
+          }}
+        >
+          {element.props.text}
+        </p>
+      );
+    case "heading1":
+      return (
+        <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl">
+          {element.props.text}
+        </h1>
+      );
+    case "heading2":
+      return (
+        <h2 className="scroll-m-20 pb-2 text-3xl font-semibold tracking-tight">
+          {element.props.text}
+        </h2>
+      );
+    case "paragraph":
+      return (
+        <p className="leading-7 [&:not(:first-child)]:mt-6">
+          {element.props.text}
+        </p>
+      );
+    case "link":
+      return (
+        <a 
+          href={element.props.href}
+          className="font-medium text-primary underline underline-offset-4"
+        >
+          {element.props.text}
+        </a>
+      );
+
+    case "button":
+      return (
+        <Button
+          variant={element.props.variant}
+          size={element.props.size}
+          className={cn(
+            element.props.width === "full" && "w-full"
+          )}
+        >
+          {element.props.text}
+        </Button>
+      );
+    case "input":
+      return (
+        <Input
+          type={element.props.type}
+          placeholder={element.props.placeholder}
+          required={element.props.required}
+          disabled={element.props.disabled}
+        />
+      );
+    case "textarea":
+      return (
+        <textarea
+          className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+          placeholder={element.props.placeholder}
+        />
+      );
+    case "checkbox":
+      return (
+        <div className="flex items-center space-x-2">
+          <Checkbox id={element.id} />
+          <label
+            htmlFor={element.id}
+            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+          >
+            {element.props.label}
+          </label>
+        </div>
+      );
+    case "radio":
+      return (
+        <div className="flex items-center space-x-2">
+          <RadioGroup>
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="default" id={element.id} />
+              <Label htmlFor={element.id}>{element.props.label}</Label>
+            </div>
+          </RadioGroup>
+        </div>
+      );
+    case "select":
+      return (
+        <Select>
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder={element.props.placeholder} />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="default">Default</SelectItem>
+          </SelectContent>
+        </Select>
+      );
+    case "switch":
+      return (
+        <div className="flex items-center space-x-2">
+          <Switch id={element.id} />
+          <Label htmlFor={element.id}>{element.props.label}</Label>
+        </div>
+      );
+
+    case "container":
+      return (
+        <div
+          className="min-h-[100px]"
+          style={{
+            padding: `${element.props.padding ?? 16}px`,
+            background: element.props.background ?? "transparent",
+            borderStyle: element.props.borderStyle ?? "solid",
+            borderWidth: `${element.props.borderWidth ?? 1}px`,
+            borderColor: element.props.borderColor ?? "#e2e8f0",
+            borderRadius: `${element.props.borderRadius ?? 8}px`
+          }}
+        >
+          Container
+        </div>
+      );
+    case "card":
+      return (
+        <div className="rounded-lg border bg-card text-card-foreground shadow-sm p-6">
+          Card
+        </div>
+      );
+    case "divider":
+      return (
+        <div className="relative">
+          <div className="absolute inset-0 flex items-center">
+            <span className="w-full border-t" />
+          </div>
+        </div>
+      );
+    case "spacer":
+      return (
+        <div style={{ height: `${element.props.height}px` }} />
+      );
+
+    case "image":
+      return (
+        <div className="relative h-40 w-full overflow-hidden rounded-lg bg-muted">
+          <div className="flex h-full items-center justify-center">
+            <ImageIcon className="h-8 w-8 text-muted-foreground/40" />
+          </div>
+        </div>
+      );
+    case "video":
+      return (
+        <div className="relative h-40 w-full overflow-hidden rounded-lg bg-muted">
+          <div className="flex h-full items-center justify-center">
+            <FileText className="h-8 w-8 text-muted-foreground/40" />
+          </div>
+        </div>
+      );
+    case "icon":
+      return (
+        <div className="h-8 w-8">
+          <Star className="h-full w-full" />
+        </div>
+      );
+    case "avatar":
+      return (
+        <div className="relative h-10 w-10 rounded-full bg-muted">
+          <div className="flex h-full items-center justify-center">
+            <User className="h-6 w-6 text-muted-foreground/40" />
+          </div>
+        </div>
+      );
+
+    case "table":
+      return (
+        <div className="relative w-full overflow-auto">
+          <table className="w-full caption-bottom text-sm">
+            <thead className="[&_tr]:border-b">
+              <tr className="border-b transition-colors hover:bg-muted/50">
+                <th className="h-12 px-4 text-left align-middle font-medium">
+                  Column
+                </th>
+              </tr>
+            </thead>
+            <tbody className="[&_tr:last-child]:border-0">
+              <tr className="border-b transition-colors hover:bg-muted/50">
+                <td className="p-4 align-middle">Cell</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      );
+    case "list":
+      return (
+        <ul className="my-6 ml-6 list-disc [&>li]:mt-2">
+          <li>List item 1</li>
+          <li>List item 2</li>
+          <li>List item 3</li>
+        </ul>
+      );
+    case "badge":
+      return (
+        <span className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2">
+          {element.props.text}
+        </span>
+      );
+    case "tag":
+      return (
+        <span className="inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2">
+          {element.props.text}
+        </span>
+      );
+
+    case "alert":
+      return (
+        <div className="relative w-full rounded-lg border p-4 [&>svg~*]:pl-7 [&>svg+div]:translate-y-[-3px] [&>svg]:absolute [&>svg]:left-4 [&>svg]:top-4 [&>svg]:text-foreground">
+          <AlertCircle className="h-4 w-4" />
+          <h5 className="mb-1 font-medium leading-none tracking-tight">
+            {element.props.text}
+          </h5>
+        </div>
+      );
+    case "progress":
+      return (
+        <div className="relative h-4 w-full overflow-hidden rounded-full bg-secondary">
+          <div
+            className="h-full w-full flex-1 bg-primary transition-all"
+            style={{ transform: `translateX(-${100 - (element.props.value ?? 0)}%)` }}
+          />
+        </div>
+      );
+
+    case "rating":
+      return (
+        <div className="flex space-x-1">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <Star
+              key={i}
+              className={cn(
+                "h-4 w-4",
+                i < (element.props.value ?? 5)
+                  ? "fill-primary text-primary"
+                  : "fill-muted text-muted"
+              )}
+            />
+          ))}
+        </div>
+      );
+    case "like":
+      return (
+        <Button variant="ghost" size="icon">
+          <Heart className="h-4 w-4" />
+        </Button>
+      );
+    case "share":
+      return (
+        <Button variant="ghost" size="icon">
+          <Share2 className="h-4 w-4" />
+        </Button>
+      );
+    case "comment":
+      return (
+        <Button variant="ghost" size="icon">
+          <MessageCircle className="h-4 w-4" />
+        </Button>
+      );
+    default:
+      return null;
+  }
+}
+
 export default function EditorPage() {
-  const [elements, setElements] = useState<Array<any>>([]);
+  const [history, setHistory] = useState<HistoryState>({
+    past: [],
+    present: [],
+    future: []
+  });
   const [selectedElement, setSelectedElement] = useState<string | null>(null);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [deviceSize, setDeviceSize] = useState(deviceSizes[0]);
@@ -1031,18 +1456,20 @@ export default function EditorPage() {
   const [activeSidebarItem, setActiveSidebarItem] = useState("layers");
   const [showGrid, setShowGrid] = useState(false);
   const [showFrame, setShowFrame] = useState(true);
+  const [isPreview, setIsPreview] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   const sensors = useSensors(
     useSensor(MouseSensor),
     useSensor(TouchSensor)
   );
 
-  const handleDragStart = (event: any) => {
+  const handleDragStart = useCallback((event: any) => {
     const { active } = event;
     setActiveId(active.id);
-  };
+  }, []);
 
-  const handleDragEnd = (event: any) => {
+  const handleDragEnd = useCallback((event: any) => {
     const { active, over } = event;
     setActiveId(null);
 
@@ -1055,14 +1482,121 @@ export default function EditorPage() {
           type: widget.type,
           props: { ...widget.defaultProps },
         };
-        setElements((prev) => [...prev, newElement]);
+        setHistory(currentHistory => {
+          const { past, present } = currentHistory;
+          return {
+            past: [...past, present],
+            present: [...present, newElement],
+            future: []
+          };
+        });
       }
     }
-  };
+  }, []);
 
-  const handleElementUpdate = (updatedElements: Array<any>) => {
-    setElements(updatedElements);
-  };
+  const handleElementUpdate = useCallback((id: string, updates: any) => {
+    setHistory(currentHistory => {
+      const { past, present } = currentHistory;
+      const newPresent = present.map((el: any) =>
+        el.id === id ? { ...el, ...updates } : el
+      );
+      return {
+        past: [...past, present],
+        present: newPresent,
+        future: []
+      };
+    });
+  }, []);
+
+  const deleteElement = useCallback((id: string) => {
+    setHistory(currentHistory => {
+      const { past, present } = currentHistory;
+      const newPresent = present.filter((el: any) => el.id !== id);
+      return {
+        past: [...past, present],
+        present: newPresent,
+        future: []
+      };
+    });
+    setSelectedElement(null);
+  }, []);
+
+  const undo = useCallback(() => {
+    setHistory(currentHistory => {
+      const { past, present, future } = currentHistory;
+      if (past.length === 0) return currentHistory;
+
+      const previous = past[past.length - 1];
+      const newPast = past.slice(0, past.length - 1);
+
+      return {
+        past: newPast,
+        present: previous,
+        future: [present, ...future]
+      };
+    });
+  }, []);
+
+  const redo = useCallback(() => {
+    setHistory(currentHistory => {
+      const { past, present, future } = currentHistory;
+      if (future.length === 0) return currentHistory;
+
+      const next = future[0];
+      const newFuture = future.slice(1);
+
+      return {
+        past: [...past, present],
+        present: next,
+        future: newFuture
+      };
+    });
+  }, []);
+
+  const saveProject = useCallback(async () => {
+    try {
+      setIsSaving(true);
+      await fetch('/api/projects/save', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          elements: history.present
+        }),
+      });
+      toast.success('Project saved successfully');
+    } catch (error) {
+      toast.error('Failed to save project');
+      console.error('Save error:', error);
+    } finally {
+      setIsSaving(false);
+    }
+  }, [history.present]);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'z') {
+        e.preventDefault();
+        if (e.shiftKey) {
+          redo();
+        } else {
+          undo();
+        }
+      }
+      if ((e.metaKey || e.ctrlKey) && e.key === 's') {
+        e.preventDefault();
+        saveProject();
+      }
+      if ((e.metaKey || e.ctrlKey) && e.key === 'Delete' && selectedElement) {
+        e.preventDefault();
+        deleteElement(selectedElement);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [undo, redo, saveProject, deleteElement, selectedElement]);
 
   return (
     <div className="flex h-screen bg-background">
@@ -1102,7 +1636,7 @@ export default function EditorPage() {
                   onClick={() => setDeviceSize(size)}
                 >
                   <size.icon className="h-4 w-4" />
-                  <span className="text-xs">{size.label}</span>
+                  {/* <span className="text-xs">{size.label}</span> */}
                 </Button>
               ))}
             </div>
@@ -1110,34 +1644,65 @@ export default function EditorPage() {
             {/* View Controls */}
             <div className="flex items-center gap-2 bg-muted/30 rounded-lg p-1">
               <Button
+                variant="ghost"
                 size="sm"
-                variant={showGrid ? "default" : "ghost"}
-                className={cn(
-                  "h-8 gap-2",
-                  showGrid && "bg-emerald-500 text-white hover:bg-emerald-600"
-                )}
-                onClick={() => setShowGrid(!showGrid)}
+                onClick={undo}
+                disabled={history.past.length === 0}
+                title="Undo (Ctrl+Z)"
               >
-                <Grid3X3 className="h-4 w-4" />
-                <span className="text-xs">Grid</span>
+                <Undo2 className="h-4 w-4" />
               </Button>
               <Button
+                variant="ghost"
                 size="sm"
-                variant={showFrame ? "default" : "ghost"}
-                className={cn(
-                  "h-8 gap-2",
-                  showFrame && "bg-emerald-500 text-white hover:bg-emerald-600"
-                )}
-                onClick={() => setShowFrame(!showFrame)}
+                onClick={redo}
+                disabled={history.future.length === 0}
+                title="Redo (Ctrl+Shift+Z)"
               >
-                <Square className="h-4 w-4" />
-                <span className="text-xs">Frame</span>
+                <Redo2 className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={saveProject}
+                disabled={isSaving}
+                title="Save (Ctrl+S)"
+              >
+                <Save className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setIsPreview(!isPreview)}
+              >
+                {isPreview ? "Edit" : "Preview"}
               </Button>
             </div>
           </div>
 
           {/* Right Side Tools */}
           <div className="flex items-center gap-1">
+            <Button
+              variant={isPreview ? "default" : "ghost"}
+              size="sm"
+              className={cn(
+                "h-8 gap-2",
+                isPreview && "bg-emerald-500 text-white hover:bg-emerald-600"
+              )}
+              onClick={() => setIsPreview(!isPreview)}
+            >
+              {isPreview ? (
+                <>
+                  <Code className="h-4 w-4" />
+                  <span className="text-xs">Edit</span>
+                </>
+              ) : (
+                <>
+                  <Play className="h-4 w-4" />
+                  <span className="text-xs">Preview</span>
+                </>
+              )}
+            </Button>
             <ModeToggle />
             <Button variant="ghost" size="icon" className="h-8 w-8">
               <Keyboard className="h-4 w-4" />
@@ -1223,13 +1788,16 @@ export default function EditorPage() {
           {/* Canvas Area */}
           <div className="flex-1 bg-background overflow-hidden">
             <div className="h-full p-6 overflow-auto bg-muted/30">
-              <div className="mx-auto" style={{ width: deviceSize.width }}>
+              <div 
+                className="mx-auto transition-all duration-300" 
+                style={{ width: deviceSize.width }}
+              >
                 <div className={cn(
                   "bg-card rounded-lg shadow-md",
                   !showFrame && "shadow-none bg-transparent"
                 )}>
                   {/* Device Frame */}
-                  {showFrame && (
+                  {showFrame && !isPreview && (
                     <div className="flex items-center justify-between border-b px-4 py-2 bg-muted/20">
                       <div className="flex items-center gap-2">
                         <div className="h-3 w-3 rounded-full bg-red-500/80" />
@@ -1246,354 +1814,43 @@ export default function EditorPage() {
                   )}
 
                   {/* Canvas Content */}
-                  <DroppableCanvas>
-                    <div 
-                      className="absolute inset-0 bg-[linear-gradient(to_right,#f0f0f0_1px,transparent_1px),linear-gradient(to_bottom,#f0f0f0_1px,transparent_1px)]" 
-                      style={{ 
-                        backgroundSize: '20px 20px',
-                        opacity: showGrid ? 0.5 : 0
-                      }}
-                    />
-                    <div className="p-4 space-y-4">
-                      {elements.length === 0 && (
-                        <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
-                          <LayoutGrid className="h-12 w-12 mb-4 opacity-50" />
-                          <p className="text-sm font-medium">Drag widgets here to start building</p>
-                        </div>
-                      )}
-                      {elements.map((element) => (
-                        <div
-                          key={element.id}
-                          className={cn(
-                            "relative transition-all hover:ring-2 hover:ring-border",
-                            selectedElement === element.id && "ring-2 ring-emerald-500"
-                          )}
-                          onClick={() => setSelectedElement(element.id)}
-                        >
-                          {/* Existing widget previews... */}
-                          
-                          {/* Solana Widget Previews */}
-                          {element.type === "walletConnect" && (
-                            <Button
-                              variant={element.props.variant}
-                              size={element.props.size}
-                              className={cn(
-                                element.props.width === "full" && "w-full",
-                                "flex items-center gap-2"
-                              )}
-                            >
-                              <Wallet className="h-4 w-4" />
-                              {element.props.text}
-                            </Button>
-                          )}
-                          {element.type === "tokenBalance" && (
-                            <div className="flex items-center gap-2 p-2 rounded-lg border bg-card">
-                              <Coins className="h-4 w-4" />
-                              <span className="font-medium">0.00 {element.props.token}</span>
-                            </div>
-                          )}
-                          {element.type === "nftGallery" && (
-                            <div className="grid gap-4 p-4 rounded-lg border bg-card"
-                              style={{
-                                gridTemplateColumns: `repeat(${element.props.columns}, 1fr)`
-                              }}
-                            >
-                              {[...Array(4)].map((_, i) => (
-                                <div key={i} className="aspect-square rounded-lg bg-muted flex items-center justify-center">
-                                  <ImageIcon className="h-8 w-8 text-muted-foreground/40" />
-                                </div>
-                              ))}
-                            </div>
-                          )}
-                          {element.type === "solanaTransfer" && (
-                            <div className="p-4 rounded-lg border bg-card space-y-4">
-                              <div className="space-y-2">
-                                <Label>Amount (SOL)</Label>
-                                <Input type="number" placeholder="0.00" />
-                              </div>
-                              <div className="space-y-2">
-                                <Label>Recipient</Label>
-                                <Input placeholder="Solana address" />
-                              </div>
-                              <Button className="w-full">
-                                <ArrowRightLeft className="h-4 w-4 mr-2" />
-                                {element.props.buttonText}
-                              </Button>
-                            </div>
-                          )}
-                          {element.type === "tokenSwap" && (
-                            <div className="p-4 rounded-lg border bg-card space-y-4">
-                              <div className="space-y-2">
-                                <Label>From</Label>
-                                <Select>
-                                  <SelectTrigger>
-                                    <SelectValue placeholder={element.props.fromToken} />
-                                  </SelectTrigger>
-                                </Select>
-                                <Input type="number" placeholder="0.00" />
-                              </div>
-                              <div className="flex justify-center">
-                                <Button variant="ghost" size="icon">
-                                  <ArrowRightLeft className="h-4 w-4" />
-                                </Button>
-                              </div>
-                              <div className="space-y-2">
-                                <Label>To</Label>
-                                <Select>
-                                  <SelectTrigger>
-                                    <SelectValue placeholder={element.props.toToken} />
-                                  </SelectTrigger>
-                                </Select>
-                                <Input type="number" placeholder="0.00" disabled />
-                              </div>
-                              <Button className="w-full">Swap</Button>
-                            </div>
-                          )}
-                          {element.type === "text" && (
-                            <p 
-                              className="p-2"
-                              style={{
-                                fontSize: `${element.props.fontSize ?? 16}px`,
-                                fontWeight: element.props.fontWeight ?? "normal",
-                                color: element.props.color ?? "#000000",
-                                textAlign: element.props.alignment ?? "left"
-                              }}
-                            >
-                              {element.props.text}
-                            </p>
-                          )}
-                          {element.type === "heading1" && (
-                            <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl">
-                              {element.props.text}
-                            </h1>
-                          )}
-                          {element.type === "heading2" && (
-                            <h2 className="scroll-m-20 pb-2 text-3xl font-semibold tracking-tight">
-                              {element.props.text}
-                            </h2>
-                          )}
-                          {element.type === "paragraph" && (
-                            <p className="leading-7 [&:not(:first-child)]:mt-6">
-                              {element.props.text}
-                            </p>
-                          )}
-                          {element.type === "link" && (
-                            <a 
-                              href={element.props.href}
-                              className="font-medium text-primary underline underline-offset-4"
-                            >
-                              {element.props.text}
-                            </a>
-                          )}
-
-                          {element.type === "button" && (
-                            <Button
-                              variant={element.props.variant}
-                              size={element.props.size}
-                              className={cn(
-                                element.props.width === "full" && "w-full"
-                              )}
-                            >
-                              {element.props.text}
-                            </Button>
-                          )}
-                          {element.type === "input" && (
-                            <Input
-                              type={element.props.type}
-                              placeholder={element.props.placeholder}
-                              required={element.props.required}
-                              disabled={element.props.disabled}
-                            />
-                          )}
-                          {element.type === "textarea" && (
-                            <textarea
-                              className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                              placeholder={element.props.placeholder}
-                            />
-                          )}
-                          {element.type === "checkbox" && (
-                            <div className="flex items-center space-x-2">
-                              <Checkbox id={element.id} />
-                              <label
-                                htmlFor={element.id}
-                                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                              >
-                                {element.props.label}
-                              </label>
-                            </div>
-                          )}
-                          {element.type === "radio" && (
-                            <div className="flex items-center space-x-2">
-                              <RadioGroup>
-                                <div className="flex items-center space-x-2">
-                                  <RadioGroupItem value="default" id={element.id} />
-                                  <Label htmlFor={element.id}>{element.props.label}</Label>
-                                </div>
-                              </RadioGroup>
-                            </div>
-                          )}
-                          {element.type === "select" && (
-                            <Select>
-                              <SelectTrigger className="w-full">
-                                <SelectValue placeholder={element.props.placeholder} />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="default">Default</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          )}
-                          {element.type === "switch" && (
-                            <div className="flex items-center space-x-2">
-                              <Switch id={element.id} />
-                              <Label htmlFor={element.id}>{element.props.label}</Label>
-                            </div>
-                          )}
-
-                          {element.type === "container" && (
-                            <div
-                              className="min-h-[100px]"
-                              style={{
-                                padding: `${element.props.padding ?? 16}px`,
-                                background: element.props.background ?? "transparent",
-                                borderStyle: element.props.borderStyle ?? "solid",
-                                borderWidth: `${element.props.borderWidth ?? 1}px`,
-                                borderColor: element.props.borderColor ?? "#e2e8f0",
-                                borderRadius: `${element.props.borderRadius ?? 8}px`
-                              }}
-                            >
-                              Container
-                            </div>
-                          )}
-                          {element.type === "card" && (
-                            <div className="rounded-lg border bg-card text-card-foreground shadow-sm p-6">
-                              Card
-                            </div>
-                          )}
-                          {element.type === "divider" && (
-                            <div className="relative">
-                              <div className="absolute inset-0 flex items-center">
-                                <span className="w-full border-t" />
-                              </div>
-                            </div>
-                          )}
-                          {element.type === "spacer" && (
-                            <div style={{ height: `${element.props.height}px` }} />
-                          )}
-
-                          {element.type === "image" && (
-                            <div className="relative h-40 w-full overflow-hidden rounded-lg bg-muted">
-                              <div className="flex h-full items-center justify-center">
-                                <ImageIcon className="h-8 w-8 text-muted-foreground/40" />
-                              </div>
-                            </div>
-                          )}
-                          {element.type === "video" && (
-                            <div className="relative h-40 w-full overflow-hidden rounded-lg bg-muted">
-                              <div className="flex h-full items-center justify-center">
-                                <FileText className="h-8 w-8 text-muted-foreground/40" />
-                              </div>
-                            </div>
-                          )}
-                          {element.type === "icon" && (
-                            <div className="h-8 w-8">
-                              <Star className="h-full w-full" />
-                            </div>
-                          )}
-                          {element.type === "avatar" && (
-                            <div className="relative h-10 w-10 rounded-full bg-muted">
-                              <div className="flex h-full items-center justify-center">
-                                <User className="h-6 w-6 text-muted-foreground/40" />
-                              </div>
-                            </div>
-                          )}
-
-                          {element.type === "table" && (
-                            <div className="relative w-full overflow-auto">
-                              <table className="w-full caption-bottom text-sm">
-                                <thead className="[&_tr]:border-b">
-                                  <tr className="border-b transition-colors hover:bg-muted/50">
-                                    <th className="h-12 px-4 text-left align-middle font-medium">
-                                      Column
-                                    </th>
-                                  </tr>
-                                </thead>
-                                <tbody className="[&_tr:last-child]:border-0">
-                                  <tr className="border-b transition-colors hover:bg-muted/50">
-                                    <td className="p-4 align-middle">Cell</td>
-                                  </tr>
-                                </tbody>
-                              </table>
-                            </div>
-                          )}
-                          {element.type === "list" && (
-                            <ul className="my-6 ml-6 list-disc [&>li]:mt-2">
-                              <li>List item 1</li>
-                              <li>List item 2</li>
-                              <li>List item 3</li>
-                            </ul>
-                          )}
-                          {element.type === "badge" && (
-                            <span className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2">
-                              {element.props.text}
-                            </span>
-                          )}
-                          {element.type === "tag" && (
-                            <span className="inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2">
-                              {element.props.text}
-                            </span>
-                          )}
-
-                          {element.type === "alert" && (
-                            <div className="relative w-full rounded-lg border p-4 [&>svg~*]:pl-7 [&>svg+div]:translate-y-[-3px] [&>svg]:absolute [&>svg]:left-4 [&>svg]:top-4 [&>svg]:text-foreground">
-                              <AlertCircle className="h-4 w-4" />
-                              <h5 className="mb-1 font-medium leading-none tracking-tight">
-                                {element.props.text}
-                              </h5>
-                            </div>
-                          )}
-                          {element.type === "progress" && (
-                            <div className="relative h-4 w-full overflow-hidden rounded-full bg-secondary">
-                              <div
-                                className="h-full w-full flex-1 bg-primary transition-all"
-                                style={{ transform: `translateX(-${100 - (element.props.value ?? 0)}%)` }}
-                              />
-                            </div>
-                          )}
-
-                          {element.type === "rating" && (
-                            <div className="flex space-x-1">
-                              {Array.from({ length: 5 }).map((_, i) => (
-                                <Star
-                                  key={i}
-                                  className={cn(
-                                    "h-4 w-4",
-                                    i < (element.props.value ?? 5)
-                                      ? "fill-primary text-primary"
-                                      : "fill-muted text-muted"
-                                  )}
-                                />
-                              ))}
-                            </div>
-                          )}
-                          {element.type === "like" && (
-                            <Button variant="ghost" size="icon">
-                              <Heart className="h-4 w-4" />
-                            </Button>
-                          )}
-                          {element.type === "share" && (
-                            <Button variant="ghost" size="icon">
-                              <Share2 className="h-4 w-4" />
-                            </Button>
-                          )}
-                          {element.type === "comment" && (
-                            <Button variant="ghost" size="icon">
-                              <MessageCircle className="h-4 w-4" />
-                            </Button>
-                          )}
-                        </div>
+                  {isPreview ? (
+                    <div className="p-4">
+                      {history.present.map((element) => (
+                        renderElement(element)
                       ))}
                     </div>
-                  </DroppableCanvas>
+                  ) : (
+                    <DroppableCanvas>
+                      <div 
+                        className="absolute inset-0 bg-[linear-gradient(to_right,#f0f0f0_1px,transparent_1px),linear-gradient(to_bottom,#f0f0f0_1px,transparent_1px)]" 
+                        style={{ 
+                          backgroundSize: '20px 20px',
+                          opacity: showGrid ? 0.5 : 0
+                        }}
+                      />
+                      <div className="p-4 space-y-4">
+                        {history.present.length === 0 && (
+                          <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
+                            <LayoutGrid className="h-12 w-12 mb-4 opacity-50" />
+                            <p className="text-sm font-medium">Drag widgets here to start building</p>
+                          </div>
+                        )}
+                        {history.present.map((element) => (
+                          <div
+                            key={element.id}
+                            className={cn(
+                              "relative transition-all hover:ring-2 hover:ring-border",
+                              selectedElement === element.id && "ring-2 ring-emerald-500"
+                            )}
+                            onClick={() => setSelectedElement(element.id)}
+                          >
+                            {renderElement(element)}
+                          </div>
+                        ))}
+                      </div>
+                    </DroppableCanvas>
+                  )}
                 </div>
               </div>
             </div>
@@ -1602,8 +1859,9 @@ export default function EditorPage() {
           {/* Properties Panel */}
           <PropertiesPanel
             selectedElement={selectedElement}
-            elements={elements}
+            elements={history.present}
             onChange={handleElementUpdate}
+            onDelete={deleteElement}
           />
         </div>
 
