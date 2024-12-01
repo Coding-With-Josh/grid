@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
-import prisma from "@/lib/prisma";
+import {prisma} from "@/lib/db";
 
 // GET /api/projects/[slug]/editor
 export async function GET(
@@ -8,7 +7,7 @@ export async function GET(
   { params }: { params: { slug: string } }
 ) {
   try {
-    const session = await auth();
+    const session = await getServerSession(authOptions);
     if (!session?.user) {
       return new NextResponse("Unauthorized", { status: 401 });
     }
