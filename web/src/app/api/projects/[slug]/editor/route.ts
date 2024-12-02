@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
-import {prisma} from "@/lib/db";
+import { prisma } from "@/lib/db";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route"; 
 
 // GET /api/projects/[slug]/editor
 export async function GET(
@@ -8,13 +10,18 @@ export async function GET(
 ) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session?.user) {
+    if (!session?.user?.id) {
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
     const project = await prisma.project.findUnique({
       where: { slug: params.slug },
-      include: { editorState: true },
+      include: { 
+        editorState: true,
+        collaborators: {
+          select: { id: true }
+        }
+      },
     });
 
     if (!project) {
@@ -22,10 +29,10 @@ export async function GET(
     }
 
     // Check if user has access to project
-    if (
-      project.creatorId !== session.user.id &&
-      !project.collaborators.some((c) => c.id === session.user.id)
-    ) {
+    const hasAccess = project.creatorId === session.user.id || 
+      project.collaborators.some(c => c.id === session.user.id);
+
+    if (!hasAccess) {
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
@@ -42,17 +49,25 @@ export async function POST(
   { params }: { params: { slug: string } }
 ) {
   try {
-    const session = await auth();
-    if (!session?.user) {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) {
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
     const json = await request.json();
     const { elements } = json;
 
+    if (!elements) {
+      return new NextResponse("Missing elements", { status: 400 });
+    }
+
     const project = await prisma.project.findUnique({
       where: { slug: params.slug },
-      include: { editorState: true },
+      include: { 
+        collaborators: {
+          select: { id: true }
+        }
+      },
     });
 
     if (!project) {
@@ -60,10 +75,10 @@ export async function POST(
     }
 
     // Check if user has access to project
-    if (
-      project.creatorId !== session.user.id &&
-      !project.collaborators.some((c) => c.id === session.user.id)
-    ) {
+    const hasAccess = project.creatorId === session.user.id || 
+      project.collaborators.some(c => c.id === session.user.id);
+
+    if (!hasAccess) {
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
@@ -79,6 +94,7 @@ export async function POST(
       create: {
         projectId: project.id,
         elements,
+        version: 1,
       },
     });
 
