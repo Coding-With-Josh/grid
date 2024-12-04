@@ -21,7 +21,7 @@ export default async function DashboardLayout({
       <div className="flex flex-1">
         <Sidebar />
         <main className="flex-1 bg-background">
-          <div className="flex h-16 items-center border-b px-4">
+          {/* <div className="flex h-16 items-center border-b px-4">
             <div className="flex flex-1 items-center justify-between space-x-4">
               <div className="flex items-center space-x-4">
                 <h1 className="text-lg font-semibold">Dashboard</h1>
@@ -30,7 +30,7 @@ export default async function DashboardLayout({
                 <DashboardNavbar />
               </div>
             </div>
-          </div>
+          </div> */}
           <div className="flex-1 space-y-4 p-8 pt-6">
             {children}
           </div>

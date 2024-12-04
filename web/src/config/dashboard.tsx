@@ -24,7 +24,7 @@ import {
 } from 'lucide-react';
 import { SidebarSection } from '@/types/dashboard';
 
-const iconClassName = "h-5 w-5 mr-2 transition-transform group-hover/item:scale-110";
+const iconClassName = "h-4 w-4 mr-2 transition-transform group-hover/item:scale-110";
 
 export const sidebarItems: SidebarSection[] = [
   {

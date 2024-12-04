@@ -20,24 +20,26 @@ export function Sidebar() {
     <aside
       className={cn(
         'group/sidebar relative flex h-full flex-col overflow-hidden border-r bg-background duration-300',
-        isCollapsed ? 'w-16' : 'w-72'
+        isCollapsed ? 'w-20' : 'w-72'
       )}
     >
-      <div className="flex h-16 items-center justify-between border-b px-4">
-        <Link href="/dashboard" className="flex items-center gap-2">
+      <div className={cn('flex h-16 items-center justify-center border-b px-1',
+        isCollapsed ? 'justify-center' : 'justify-between'
+      )}>
+        {/* <Link href="/dashboard" className="flex items-center gap-2">
           {!isCollapsed && (
             <span className="text-lg font-semibold">Grid</span>
           )}
-        </Link>
+        </Link> */}
         <Button
-          variant="ghost"
+          variant="secondary"
           size="icon"
-          className="h-6 w-6"
+          className="min-h-6 min-w-6 rounded-full p-0.5"
           onClick={() => setIsCollapsed(!isCollapsed)}
         >
           <ChevronLeft
             className={cn(
-              'h-4 w-4 transition-transform',
+              'h-6 w-6 transition-transform',
               isCollapsed && 'rotate-180'
             )}
           />
@@ -69,14 +71,14 @@ export function Sidebar() {
                             <Link
                               href={item.href}
                               className={cn(
-                                'group/item flex h-9 w-full items-center justify-start rounded-md px-3 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground',
+                                'group/item flex min-h-9 w-full items-center justify-start rounded-md px-3 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground',
                                 isActive ? 'bg-accent text-accent-foreground' : 'text-muted-foreground',
                                 isCollapsed && 'justify-center px-2'
                               )}
                             >
                               <span className={cn(
                                 'flex items-center',
-                                isCollapsed ? 'w-5 h-5' : 'w-full'
+                                isCollapsed ? 'min-w-5 min-h-5' : 'w-full'
                               )}>
                                 {item.icon}
                                 {!isCollapsed && (
