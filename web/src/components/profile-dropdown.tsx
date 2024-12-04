@@ -65,12 +65,12 @@ export function ProfileDropdown() {
               <Badge 
                 variant="secondary" 
                 className={cn(
-                  'px-2 py-0.5',
+                  'px-2 py-0.3 text-[8px] font-normal',
                   roleColors[session.user.role || 'creator'],
                   'text-white'
                 )}
               >
-                {roleDescriptions[session.user.role || 'creator']}
+                {session.user.role || 'creator'}
               </Badge>
             </div>
           </div>

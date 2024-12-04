@@ -31,7 +31,7 @@ import Image from "next/image";
 export function DashboardNavbar() {
   return (
     <>
-      <nav className="fixed top-0 right-0 w-[calc(100%-256px)] border-b border-border/40 bg-background/45 backdrop-blur supports-[backdrop-filter]:bg-background/35 z-50 ">
+      <nav className="fixed top-0 right-0 w-screen border-b border-border/40 bg-background/45 backdrop-blur supports-[backdrop-filter]:bg-background/35 z-50 ">
         <div className="container flex h-20 items-center justify-between px-6">
         <div className="px-6 py-4"> 
                 <Link href="/dashboard" className="flex items-center gap-2">

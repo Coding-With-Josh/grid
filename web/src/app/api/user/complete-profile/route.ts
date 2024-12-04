@@ -44,6 +44,7 @@ export async function POST(request: Request) {
       data: {
         ...validatedData,
         hasCompletedOnboarding: true,
+        name: validatedData.fullName.split(' ')[0],
       },
     });
     console.log("User updated:", updatedUser);
